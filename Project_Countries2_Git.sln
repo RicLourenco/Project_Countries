@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPF_Project_Countries", "WP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Classes", "Classes\Classes.csproj", "{8F136664-44FC-4572-94BA-D28EECAC826B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{7433F061-5816-4D07-A06A-26D320324C6F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{8F136664-44FC-4572-94BA-D28EECAC826B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F136664-44FC-4572-94BA-D28EECAC826B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F136664-44FC-4572-94BA-D28EECAC826B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7433F061-5816-4D07-A06A-26D320324C6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7433F061-5816-4D07-A06A-26D320324C6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7433F061-5816-4D07-A06A-26D320324C6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7433F061-5816-4D07-A06A-26D320324C6F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
