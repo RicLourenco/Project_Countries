@@ -1,7 +1,7 @@
-﻿namespace WPF_Project_Countries.Services
+﻿namespace Library.Services
 {
     using System.Net;
-    using Classes;
+    using Models;
 
     public class NetworkService
     {

@@ -77,10 +77,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Services\ApiService.cs" />
-    <Compile Include="Services\DataService.cs" />
-    <Compile Include="Services\DialogService.cs" />
-    <Compile Include="Services\NetworkService.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -121,11 +117,10 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\Classes\Classes.csproj">
-      <Project>{8f136664-44fc-4572-94ba-d28eecac826b}</Project>
-      <Name>Classes</Name>
+    <ProjectReference Include="..\Library\Library.csproj">
+      <Project>{c7a358c9-6824-431b-9c09-7fd6c0ecfb2b}</Project>
+      <Name>Library</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

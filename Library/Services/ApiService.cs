@@ -1,11 +1,11 @@
-﻿namespace WPF_Project_Countries.Services
+﻿namespace Library.Services
 {
-    using Classes;
-    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Newtonsoft.Json;
+    using Models;
 
     public class ApiService
     {

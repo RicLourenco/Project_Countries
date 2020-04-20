@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Library.Models;
+using Library.Services;
 
 namespace WPF_Project_Countries
 {
@@ -20,9 +22,51 @@ namespace WPF_Project_Countries
     /// </summary>
     public partial class MainWindow : Window
     {
+        private List<Country> Countries;
+
+        private NetworkService networkService;
+
+        private ApiService apiService;
+
+        private DialogService dialogService;
+
+        private DataService dataService;
+
         public MainWindow()
         {
             InitializeComponent();
+            networkService = new NetworkService();
+            apiService = new ApiService();
+            dialogService = new DialogService();
+            dataService = new DataService();
+        }
+
+        private async void LoadCountries()
+        {
+            bool Load;
+
+            var connection = networkService.CheckConnection();
+
+            if (!connection.IsSuccess)
+            {
+                LoadLocalRates();
+                Load = false;
+            }
+            else
+            {
+                await LoadApiRates();
+                Load = true;
+            }
+        }
+
+        private void LoadLocalRates()
+        {
+            throw new NotImplementedException();
+        }
+
+        private Task LoadApiRates()
+        {
+            throw new NotImplementedException();
         }
     }
 }

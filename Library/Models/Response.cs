@@ -1,4 +1,4 @@
-﻿namespace Classes
+﻿namespace Library.Models
 {
     public class Response
     {

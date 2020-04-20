@@ -1,4 +1,4 @@
-﻿namespace Classes
+﻿namespace Library.Models
 {
     using System.Collections.Generic;
 
