@@ -1,10 +1,11 @@
-﻿namespace Library.Services
+﻿namespace WPF_Project_Countries.Services
 {
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
     using System.IO;
-    using Models;
+    using System.Windows.Media.Imaging;
+    using Library.Models;
 
     public class DataService
     {
@@ -15,11 +16,13 @@
         private DialogService dialogService;
 
         /// <summary>
-        /// Default constructor that creates a new local sqlite table for the countries, if one doesn't exist
+        /// Default constructor that creates a new local sqlite database, and table for the countries, if one doesn't exist
         /// </summary>
         public DataService()
         {
-            if(!Directory.Exists("Data"))
+            dialogService = new DialogService();
+
+            if (!Directory.Exists("Data"))
             {
                 Directory.CreateDirectory("Data");
             }
@@ -31,27 +34,27 @@
                 connection = new SQLiteConnection("Data Source=" + path);
                 connection.Open();
 
-                string sqlcommand = "create table if not exists countries(name varchar(50), alpha2code varchar(20), alpha3code varchar(20) primary key, capital varchar(50), region varchar(50), subregion varchar(50), population int, denonym varchar(50), area numeric, gini numeric, nativeName varchar(50), numericCode varchar(20), flag blob, cioc varchar(20))";
+                string sqlcommand = "create table if not exists countries(name varchar(50), alpha2code varchar(20) primary key, alpha3code varchar(20), capital varchar(50), region varchar(50), subregion varchar(50), population int, denonym varchar(50), area numeric, gini numeric, nativeName varchar(50), numericCode varchar(20), flag blob, cioc varchar(20))";
 
                 command = new SQLiteCommand(sqlcommand, connection);
 
                 command.ExecuteNonQuery();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 dialogService.ShowMessage("Erro", e.Message);
             }
         }
 
         /// <summary>
-        /// Receive a C# list of countries and insert into the countries sqlite table
+        /// Receives a C# list of countries and inserts them into the countries sqlite table
         /// </summary>
         /// <param name="countries"></param>
         public void SaveData(List<Country> countries)
         {
             try
             {
-                foreach(var country in countries)
+                foreach (var country in countries)
                 {
                     command.Parameters.AddWithValue("@name", country.Name);
                     command.Parameters.AddWithValue("@alpha2code", country.Alpha2Code);
@@ -83,14 +86,14 @@
 
                 connection.Close();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 dialogService.ShowMessage("Erro", e.Message);
             }
         }
 
         /// <summary>
-        /// Read all rows from the countries sqlite table and insert into the countries C# list
+        /// Reads all rows from the countries sqlite table and inserts them into the countries C# list
         /// </summary>
         /// <returns></returns>
         public List<Country> GetData()
@@ -105,12 +108,12 @@
 
                 SQLiteDataReader reader = command.ExecuteReader();
 
-                while(reader.Read())
+                while (reader.Read())
                 {
                     countries.Add(new Country
                     {
-                        Name = (string) reader["name"],
-                        Alpha2Code = (string) reader["alpha2code"],
+                        Name = (string)reader["name"],
+                        Alpha2Code = (string)reader["alpha2code"],
                         Alpha3Code = (string)reader["alpha3code"],
                         Capital = (string)reader["capital"],
                         Region = (string)reader["region"],
@@ -129,7 +132,7 @@
                 connection.Close();
                 return countries;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 dialogService.ShowMessage("Erro", e.Message);
                 return null;
@@ -137,7 +140,7 @@
         }
 
         /// <summary>
-        /// Delete all rows from the contries sqlite table
+        /// Deletes all rows from the contries sqlite table
         /// </summary>
         public void DeleteData()
         {
@@ -149,10 +152,28 @@
 
                 command.ExecuteNonQuery();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 dialogService.ShowMessage("Erro", e.Message);
             }
+        }
+
+        /// <summary>
+        /// Gets a flag image from the Flags folder
+        /// </summary>
+        /// <param name="country"></param>
+        /// <returns>BitmapImage with the appropriate flag in bmp format</returns>
+        public BitmapImage GetFlag(Country country)
+        {
+            if (File.Exists($"{Environment.CurrentDirectory}\\Flags\\{country.Name}.bmp"))
+            {
+                return new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\Flags\\{country.Name}.bmp", UriKind.RelativeOrAbsolute));
+            }
+            else
+            {
+                return new BitmapImage(new Uri($"{Environment.CurrentDirectory}\\Flags\\Default.bmp", UriKind.RelativeOrAbsolute));
+            }
+
         }
     }
 }

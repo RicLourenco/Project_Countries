@@ -7,6 +7,20 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <ComboBox x:Name="ComboBox_countries" HorizontalAlignment="Left" VerticalAlignment="Top" Width="158" Margin="10,58,0,0" SelectionChanged="ComboBox_countries_SelectionChanged"/>
+        <Label x:Name="Label_status" Content="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,383,0,0"/>
+        <Button x:Name="Button_close" Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="93,383,0,0" Click="Button_close_Click"/>
+        <TextBox x:Name="TextBox_region" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Margin="10,160,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_subregion" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Margin="170,160,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_gini" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Margin="10,315,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_capital" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Margin="10,241,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_population" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Margin="170,241,0,0" IsEnabled="False"/>
+        <Label Content="Gini Index" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,284,0,0" Width="120"/>
+        <Label Content="Population" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="170,210,0,0" Width="120"/>
+        <Label Content="Capital" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,210,0,0" Width="120"/>
+        <Label Content="Sub-Region" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="170,129,0,0" Width="120"/>
+        <Label Content="Region&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,129,0,0" Width="120"/>
+        <Image x:Name="Image_flag" HorizontalAlignment="Left" Height="95" VerticalAlignment="Top" Width="185" Margin="261,284,0,0"/>
+
     </Grid>
 </Window>

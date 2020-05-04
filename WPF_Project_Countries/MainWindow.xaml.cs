@@ -1,22 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Library.Models;
-using Library.Services;
-
-namespace WPF_Project_Countries
+﻿namespace WPF_Project_Countries
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
+    using System.IO.Packaging;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.Web.UI.WebControls;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Data;
+    using System.Windows.Documents;
+    using System.Windows.Input;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using System.Windows.Navigation;
+    using System.Windows.Shapes;
+    using Library.Models;
+    using WPF_Project_Countries.Services;
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -39,6 +43,7 @@ namespace WPF_Project_Countries
             apiService = new ApiService();
             dialogService = new DialogService();
             dataService = new DataService();
+            LoadCountries();
         }
 
         private async void LoadCountries()
@@ -57,16 +62,56 @@ namespace WPF_Project_Countries
                 await LoadApiRates();
                 Load = true;
             }
+
+            if(Countries.Count == 0)
+            {
+                this.IsEnabled = false;
+                Label_status.Content = "Primeira";
+                return;
+            }
+
+            ComboBox_countries.ItemsSource = Countries;
+            ComboBox_countries.DisplayMemberPath = "Name";
+
+            if(Load)
+            {
+
+            }
+            else
+            {
+
+            }
+
+
         }
 
         private void LoadLocalRates()
         {
-            throw new NotImplementedException();
+            Countries = dataService.GetData();
         }
 
-        private Task LoadApiRates()
+        private async Task LoadApiRates()
         {
-            throw new NotImplementedException();
+            var response = await apiService.GetCountries("http://restcountries.eu", "/rest/v2/all");
+
+            Countries = (List<Country>) response.Result;
+        }
+
+        private void ComboBox_countries_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Country obj = (Country) ComboBox_countries.SelectedItem;
+
+            TextBox_capital.Text = obj.Capital;
+            TextBox_gini.Text = obj.Gini.ToString();
+            TextBox_population.Text = obj.Population.ToString();
+            TextBox_region.Text = obj.Region;
+            TextBox_subregion.Text = obj.Subregion;
+            Image_flag.Source = dataService.GetFlag(obj);
+        }
+
+        private void Button_close_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }

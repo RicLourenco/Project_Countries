@@ -1,10 +1,14 @@
-﻿namespace Library.Services
+﻿namespace WPF_Project_Countries.Services
 {
     using System.Net;
-    using Models;
+    using Library.Models;
 
     public class NetworkService
     {
+        /// <summary>
+        /// Checks if the computer has internet connection
+        /// </summary>
+        /// <returns>Response object</returns>
         public Response CheckConnection()
         {
             var client = new WebClient();
