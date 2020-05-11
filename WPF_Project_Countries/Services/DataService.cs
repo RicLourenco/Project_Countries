@@ -7,6 +7,9 @@
     using System.Windows.Media.Imaging;
     using Library.Models;
 
+    //TODO: Create a new TopLevelDomainServices.cs and move the SaveTopLevelDomain and GetTopLevelDomain methods into there
+    //TODO: Do the same for all the remaining tables in the database
+
     public class DataService
     {
         private SQLiteConnection connection;
@@ -16,7 +19,7 @@
         private DialogService dialogService;
 
         /// <summary>
-        /// Default constructor that creates a new local sqlite database, and table for the countries, if one doesn't exist
+        /// Default constructor that creates a new local sqlite database and its tables, if one doesn't exist
         /// </summary>
         public DataService()
         {
@@ -34,7 +37,14 @@
                 connection = new SQLiteConnection("Data Source=" + path);
                 connection.Open();
 
-                string sqlcommand = "create table if not exists countries(name varchar(50), alpha2code varchar(20) primary key, alpha3code varchar(20), capital varchar(50), region varchar(50), subregion varchar(50), population int, denonym varchar(50), area numeric, gini numeric, nativeName varchar(50), numericCode varchar(20), flag blob, cioc varchar(20))";
+                string sqlcommand = "create table if not exists countries(name varchar(50), alpha2code char(2), alpha3code char(3) primary key, capital varchar(50), region varchar(50), subregion varchar(50), population integer, denonym varchar(50), area real, gini real, nativeName varchar(50), numericCode varchar(20), cioc varchar(20));" +
+                    "create table if not exists callingCodes(id int primary key, alpha3code char(3), topLevelDomain varchar(10));" +
+                    "create table if not exists altSpellings(id int primary key, alpha3code char(3), altSpelling varchar(50), foreign key (alpha3code) references countries(alpha3code));" +
+                    "create table if not exists latlngs(id int primary key, alpha3code char(3), latlng real, foreign key (alpha3code) references countries(alpha3code));" +
+                    "create table if not exists timeZones(id int primary key, alpha3code char(3), timeZone varchar(15), foreign key (alpha3code) references countries(alpha3code));" +
+                    "create table if not exists borders(id int primary key, alpha3code char(3), border char(3), foreign key (alpha3code) references countries(alpha3code))";
+
+                CreateOtherTables();
 
                 command = new SQLiteCommand(sqlcommand, connection);
 
@@ -44,6 +54,15 @@
             {
                 dialogService.ShowMessage("Erro", e.Message);
             }
+        }
+
+        private void CreateOtherTables()
+        {
+            TopLevelDomainServices topLevelDomainServices = new TopLevelDomainServices();
+            CurrencyDataService currencyDataService = new CurrencyDataService();
+            LanguageDataService languageDataService = new LanguageDataService();
+            RegionalBlocDataService regionalBlocDataService = new RegionalBlocDataService();
+            TranslationsDataService translationsDataService = new TranslationsDataService();
         }
 
         /// <summary>
@@ -68,20 +87,13 @@
                     command.Parameters.AddWithValue("@gini", country.Gini);
                     command.Parameters.AddWithValue("@nativeName", country.NativeName);
                     command.Parameters.AddWithValue("@numericCode", country.NumericCode);
-                    command.Parameters.AddWithValue("@flag", country.Flag);
                     command.Parameters.AddWithValue("@cioc", country.Cioc);
 
-                    command.CommandText = "insert into countries values(@name, @alpha2code, @alpha3code, @capital, @region, @subregion, @population, @denonym, @area, @gini, @nativeName, @numericCode, @flag, @cioc)";
+                    command.CommandText = "insert into countries values(@name, @alpha2code, @alpha3code, @capital, @region, @subregion, @population, @denonym, @area, @gini, @nativeName, @numericCode, @cioc)";
 
                     command.Connection = connection;
 
                     command.ExecuteNonQuery();
-
-                    /*
-                    string sql = string.Format($"insert into countries values('{country.Name}', '{country.Alpha2Code}', '{country.Alpha3Code}', '{country.Capital}', '{country.Region}', '{country.Subregion}', {country.Population}, '{country.Demonym}', '{country.Area}', '{country.Gini}', '{country.NativeName}', '{country.NumericCode}', {country.Flag}, '{country.Cioc}')");
-                    
-                    command = new SQLiteCommand(sql, connection);
-                    */
                 }
 
                 connection.Close();
@@ -102,7 +114,7 @@
 
             try
             {
-                string sql = "select name, alpha2code, alpha3code, capital, region, subregion, population, denonym, area, gini, nativeName, numericCode, flag, cioc";
+                string sql = "select name, alpha2code, alpha3code, capital, region, subregion, population, denonym, area, gini, nativeName, numericCode, cioc from countries";
 
                 command = new SQLiteCommand(sql, connection);
 
@@ -112,20 +124,19 @@
                 {
                     countries.Add(new Country
                     {
-                        Name = (string)reader["name"],
-                        Alpha2Code = (string)reader["alpha2code"],
-                        Alpha3Code = (string)reader["alpha3code"],
-                        Capital = (string)reader["capital"],
-                        Region = (string)reader["region"],
-                        Subregion = (string)reader["subregion"],
-                        Population = (long)reader["population"],
-                        Demonym = (string)reader["denonym"],
-                        Area = (double)reader["area"],
-                        Gini = (double)reader["gini"],
-                        NativeName = (string)reader["nativeName"],
-                        NumericCode = (string)reader["numericCode"],
-                        Flag = (Uri)reader["flag"],
-                        Cioc = (string)reader["cioc"],
+                        Name = reader["name"].ToString(),
+                        Alpha2Code = reader["alpha2code"].ToString(),
+                        Alpha3Code = reader["alpha3code"].ToString(),
+                        Capital = reader["capital"].ToString(),
+                        Region = reader["region"].ToString(),
+                        Subregion = reader["subregion"].ToString(),
+                        Population = Convert.ToInt64(reader["population"]),
+                        Demonym = reader["denonym"].ToString(),
+                        Area = Convert.ToDouble(reader["area"]),
+                        Gini = Convert.ToDouble(reader["gini"]),
+                        NativeName = reader["nativeName"].ToString(),
+                        NumericCode = reader["numericCode"].ToString(),
+                        Cioc = reader["cioc"].ToString()
                     });
                 }
 
@@ -146,7 +157,21 @@
         {
             try
             {
-                string sql = "delete from countries";
+                string sql = "begin;" +
+                    "delete from altSpellings;" +
+                    "delete from borders;" +
+                    "delete from callingCodes;" +
+                    "delete from currencies;" +
+                    "delete from languages;" +
+                    "delete from latlngs;" +
+                    "delete from otherAcronyms;" +
+                    "delete from otherNames;" +
+                    "delete from regionalBlocs;" +
+                    "delete from timeZones;" +
+                    "delete from topLevelDomains;" +
+                    "delete from translations;" +
+                    "delete from countries;" +
+                    "commit;";
 
                 command = new SQLiteCommand(sql, connection);
 

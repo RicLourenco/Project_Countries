@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.PerformanceData;
     using System.Drawing;
     using System.IO;
     using System.IO.Packaging;
@@ -9,6 +10,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using System.Web.UI.WebControls;
+    using System.Web.WebSockets;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
@@ -26,7 +28,7 @@
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<Country> Countries;
+        private List<Country> Countries = new List<Country>();
 
         private NetworkService networkService;
 
@@ -36,6 +38,8 @@
 
         private DataService dataService;
 
+        public Country country;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -43,6 +47,7 @@
             apiService = new ApiService();
             dialogService = new DialogService();
             dataService = new DataService();
+            country = new Country();
             LoadCountries();
         }
 
@@ -65,8 +70,8 @@
 
             if(Countries.Count == 0)
             {
-                this.IsEnabled = false;
-                Label_status.Content = "Primeira";
+                ComboBox_countries.IsEnabled = false;
+                Label_status.Content = "For the initial setup, an internet connection is needed\nPlease restart the program after connecting to the internet";
                 return;
             }
 
@@ -81,7 +86,7 @@
             {
 
             }
-
+            Button_details.IsEnabled = true;
 
         }
 
@@ -95,23 +100,32 @@
             var response = await apiService.GetCountries("http://restcountries.eu", "/rest/v2/all");
 
             Countries = (List<Country>) response.Result;
+
+            dataService.DeleteData();
+
+            dataService.SaveData(Countries);
         }
 
         private void ComboBox_countries_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Country obj = (Country) ComboBox_countries.SelectedItem;
+            country = (Country) ComboBox_countries.SelectedItem;
 
-            TextBox_capital.Text = obj.Capital;
-            TextBox_gini.Text = obj.Gini.ToString();
-            TextBox_population.Text = obj.Population.ToString();
-            TextBox_region.Text = obj.Region;
-            TextBox_subregion.Text = obj.Subregion;
-            Image_flag.Source = dataService.GetFlag(obj);
+            TextBox_capital.Text = country.Capital;
+            TextBox_gini.Text = country.Gini.ToString();
+            TextBox_population.Text = country.Population.ToString();
+            TextBox_region.Text = country.Region;
+            TextBox_subregion.Text = country.Subregion;
+            Image_flag.Source = dataService.GetFlag(country);
         }
 
         private void Button_close_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void Button_details_Click(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
 }

@@ -12,6 +12,7 @@
     using Library.Models;
 
     //TODO: Proper error handling in the catch blocks when downloading and converting flags
+    //TODO: If the default.svg link no longer exists, the program will crash
 
     public class ApiService
     {
@@ -79,9 +80,9 @@
         /// <param name="countries"></param>
         private async Task ConvertFlags(List<Country> countries)
         {
-            await Task.Run(() =>
+            foreach (var country in countries)
             {
-                foreach (var country in countries)
+                await Task.Run(() =>
                 {
                     try
                     {
@@ -102,26 +103,33 @@
                     {
 
                     }
-                }
-            });
+                });
+            }
 
             await Task.Run(()=> {
-                var defaultFlag = SvgDocument.Open($@"Flags\Default.svg");
-                using (var smallBitmap = defaultFlag.Draw())
+                try
                 {
-                    var width = smallBitmap.Width;
-                    var height = smallBitmap.Height;
-
-                    using (var bitmap = defaultFlag.Draw(width, height))
+                    var defaultFlag = SvgDocument.Open($@"Flags\Default.svg");
+                    using (var smallBitmap = defaultFlag.Draw())
                     {
-                        bitmap.Save($@"Flags\Default.bmp", ImageFormat.Bmp);
+                        var width = smallBitmap.Width;
+                        var height = smallBitmap.Height;
+
+                        using (var bitmap = defaultFlag.Draw(width, height))
+                        {
+                            bitmap.Save($@"Flags\Default.bmp", ImageFormat.Bmp);
+                        }
                     }
+                }
+                catch
+                {
+
                 }
             });
         }
 
         /// <summary>
-        /// Donwload flags from the API in svg format
+        /// Download flags from the API in svg format
         /// </summary>
         /// <param name="countries"></param>
         private void DownloadFlags(List<Country> countries)
@@ -145,7 +153,7 @@
             {
                 var noFlag = new WebClient();
 
-                noFlag.DownloadFile("https://upload.wikimedia.org/wikipedia/commons/b/b0/No_flags.svg", $@"Flags\Default.svg");
+                noFlag.DownloadFile("https://upload.wikimedia.org/wikipedia/commons/b/b0/No_flag.svg", $@"Flags\Default.svg");
 
                 noFlag.Dispose();
             }

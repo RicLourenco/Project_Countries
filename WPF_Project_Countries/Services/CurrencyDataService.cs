@@ -14,7 +14,7 @@
 
         private SQLiteCommand command;
 
-        private DialogService dialogService;
+        private DialogService dialogService = new DialogService();
 
         public CurrencyDataService()
         {
@@ -25,7 +25,7 @@
                 connection = new SQLiteConnection("Data Source=" + path);
                 connection.Open();
 
-                string sqlcommand = "create table if not exists countries(name varchar(50), alpha2code varchar(20) primary key, alpha3code varchar(20), capital varchar(50), region varchar(50), subregion varchar(50), population int, denonym varchar(50), area numeric, gini numeric, nativeName varchar(50), numericCode varchar(20), flag blob, cioc varchar(20))";
+                string sqlcommand = "create table if not exists currencies(id int primary key, alpha3code char(3), code char(3), name varchar(50), symbol varchar(10), foreign key(alpha3code) references country(alpha3code))";
 
                 command = new SQLiteCommand(sqlcommand, connection);
 

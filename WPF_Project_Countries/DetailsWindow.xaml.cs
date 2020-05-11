@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace WPF_Project_Countries
 {
     /// <summary>
-    /// Interaction logic for Login.xaml
+    /// Interaction logic for DetailsWindow.xaml
     /// </summary>
-    public partial class Login : Window
+    public partial class DetailsWindow : Window
     {
-        public Login()
+        public DetailsWindow()
         {
             InitializeComponent();
         }
