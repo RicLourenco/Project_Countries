@@ -88,14 +88,21 @@
     <Compile Include="DetailsWindow.xaml.cs">
       <DependentUpon>DetailsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Services\AltSpellingsService.cs" />
     <Compile Include="Services\ApiService.cs" />
+    <Compile Include="Services\BordersService.cs" />
+    <Compile Include="Services\CallingCodesService.cs" />
     <Compile Include="Services\CurrencyDataService.cs" />
     <Compile Include="Services\DataService.cs" />
     <Compile Include="Services\DialogService.cs" />
     <Compile Include="Services\LanguageDataService.cs" />
+    <Compile Include="Services\LatlngsService.cs" />
     <Compile Include="Services\NetworkService.cs" />
+    <Compile Include="Services\OtherAcronymsService.cs" />
+    <Compile Include="Services\OtherNamesService.cs" />
     <Compile Include="Services\RegionalBlocDataService.cs" />
-    <Compile Include="Services\TopLevelDomainServices.cs" />
+    <Compile Include="Services\TimeZonesService.cs" />
+    <Compile Include="Services\TopLevelDomainService.cs" />
     <Compile Include="Services\TranslationsDataService.cs" />
     <Page Include="DetailsWindow.xaml">
       <SubType>Designer</SubType>

@@ -22,8 +22,10 @@
         /// <param name="urlBase"></param>
         /// <param name="controller"></param>
         /// <returns>Response object</returns>
-        public async Task<Response> GetCountries(string urlBase, string controller)
+        public async Task<Response> GetCountries(string urlBase, string controller, IProgress<ProgressReport> progress)
         {
+            
+
             try
             {
                 var client = new HttpClient
@@ -56,7 +58,7 @@
 
                 DownloadFlags(countries);
 
-                await ConvertFlags(countries);
+                await ConvertFlags(countries, progress);
 
                 return new Response
                 {
@@ -78,11 +80,13 @@
         /// Converts flags from svg format to bmp
         /// </summary>
         /// <param name="countries"></param>
-        private async Task ConvertFlags(List<Country> countries)
+        private async Task ConvertFlags(List<Country> countries, IProgress<ProgressReport> progress)
         {
-            foreach (var country in countries)
-            {
-                await Task.Run(() =>
+            ProgressReport report = new ProgressReport();
+            byte i = 1;
+
+            await Task.Run(() => {
+                foreach (var country in countries)
                 {
                     try
                     {
@@ -103,8 +107,12 @@
                     {
 
                     }
-                });
-            }
+
+                    report.CompletePercentage = Convert.ToByte((i * 100) / countries.Count);
+                    progress.Report(report);
+                    i++;
+                }
+            });
 
             await Task.Run(()=> {
                 try

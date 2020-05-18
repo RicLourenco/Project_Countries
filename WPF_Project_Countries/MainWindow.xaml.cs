@@ -28,7 +28,7 @@
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<Country> Countries = new List<Country>();
+        private List<Country> Countries;
 
         private NetworkService networkService;
 
@@ -47,25 +47,26 @@
             apiService = new ApiService();
             dialogService = new DialogService();
             dataService = new DataService();
+            Countries = new List<Country>();
             country = new Country();
             LoadCountries();
         }
 
         private async void LoadCountries()
         {
-            bool Load;
+            Label_status.Content = "Loading...";
 
             var connection = networkService.CheckConnection();
 
-            if (!connection.IsSuccess)
+            if (connection.IsSuccess)
             {
-                LoadLocalRates();
-                Load = false;
+                await LoadApiRates();
+                Label_status.Content = $"Countries loaded from the API on {DateTime.UtcNow}";
             }
             else
             {
-                await LoadApiRates();
-                Load = true;
+                LoadLocalRates();
+                Label_status.Content = "Countries loaded from the local database";
             }
 
             if(Countries.Count == 0)
@@ -78,16 +79,12 @@
             ComboBox_countries.ItemsSource = Countries;
             ComboBox_countries.DisplayMemberPath = "Name";
 
-            if(Load)
-            {
-
-            }
-            else
-            {
-
-            }
             Button_details.IsEnabled = true;
+        }
 
+        private void ReportProgress(object sender, ProgressReport e)
+        {
+            ProgressBar_api.Value = e.CompletePercentage;
         }
 
         private void LoadLocalRates()
@@ -97,7 +94,10 @@
 
         private async Task LoadApiRates()
         {
-            var response = await apiService.GetCountries("http://restcountries.eu", "/rest/v2/all");
+            Progress<ProgressReport> apiProgress = new Progress<ProgressReport>();
+            apiProgress.ProgressChanged += ReportProgress;
+
+            var response = await apiService.GetCountries("http://restcountries.eu", "/rest/v2/all", apiProgress);
 
             Countries = (List<Country>) response.Result;
 
@@ -125,7 +125,8 @@
 
         private void Button_details_Click(object sender, RoutedEventArgs e)
         {
-            
+            DetailsWindow details = new DetailsWindow(country);
+            details.Show();
         }
     }
 }

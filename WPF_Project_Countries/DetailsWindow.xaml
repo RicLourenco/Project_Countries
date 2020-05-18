@@ -5,8 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPF_Project_Countries"
         mc:Ignorable="d"
-        Title="DetailsWindow" Height="450" Width="800">
+        Title="DetailsWindow" Height="486.486" Width="800" Closing="Window_Closing">
     <Grid>
-        
+        <Label Content="Alpha 2 code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15,35,0,0"/>
+        <Label Content="Currencies" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="30,242,0,0"/>
+        <Label Content="Native name" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,119,0,0"/>
+        <Label Content="Cioc" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="59,65,0,0"/>
+        <Label Content="Denonym" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="34,91,0,0"/>
+        <Label Content="Alpha 3 code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15,7,0,0"/>
+        <Label Content="Numeric code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="11,147,0,0"/>
+        <Label Content="Top level domains" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,178,0,0" Height="24"/>
+        <ListBox x:Name="ListBox_topLevelDomains" HorizontalAlignment="Left" Height="59" VerticalAlignment="Top" Width="37" Margin="120,178,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_cioc" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="47" Margin="100,66,0,0" IsEnabled="False" RenderTransformOrigin="2.57,-1.203"/>
+        <TextBox x:Name="TextBox_numericCode" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="47" Margin="100,150,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_nativeName" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="167" Margin="100,122,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_denonym" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="162" Margin="100,94,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_alpha3" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="51" Margin="100,10,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_alpha2" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="51" Margin="100,38,0,0" IsEnabled="False"/>
+        <Button Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="707,389,0,0" Click="Button_Click"/>
+        <DataGrid x:Name="GridView_currencies" HorizontalAlignment="Left" Height="84" VerticalAlignment="Top" Width="238" Margin="100,242,0,0" CanUserResizeRows="False" SelectionMode="Single" IsReadOnly="True"/>
+        <Label Content="Languages" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,331,0,0"/>
+        <DataGrid x:Name="GridView_languages" HorizontalAlignment="Left" Height="97" VerticalAlignment="Top" Width="283" Margin="100,331,0,0" IsReadOnly="True"/>
+        <Label Content="Translations" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="311,10,0,0"/>
+        <Label Content="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="422,250,0,0"/>
+
     </Grid>
 </Window>
