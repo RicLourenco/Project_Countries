@@ -54,22 +54,24 @@
 
         private async void LoadCountries()
         {
-            Label_status.Content = "Loading...";
-
             var connection = networkService.CheckConnection();
 
             if (connection.IsSuccess)
             {
                 await LoadApiRates();
-                Label_status.Content = $"Countries loaded from the API on {DateTime.UtcNow}";
             }
             else
             {
                 LoadLocalRates();
-                Label_status.Content = "Countries loaded from the local database";
+                Label_status.Visibility = Visibility.Visible;
+                Label_status.Content = "Countries loaded from the offline database";
             }
 
-            if(Countries.Count == 0)
+            if(Countries == null)
+            {
+                Label_status.Content = "The countries couldn't be loaded\nbecause the program didn't finish saving\nbefore closing last time it connected to the internet";
+            }
+            else if(Countries.Count == 0)
             {
                 ComboBox_countries.IsEnabled = false;
                 Label_status.Content = "For the initial setup, an internet connection is needed\nPlease restart the program after connecting to the internet";
@@ -78,6 +80,7 @@
 
             ComboBox_countries.ItemsSource = Countries;
             ComboBox_countries.DisplayMemberPath = "Name";
+            ComboBox_countries.SelectedIndex = 0;
 
             Button_details.IsEnabled = true;
         }
@@ -85,6 +88,29 @@
         private void ReportProgress(object sender, ProgressReport e)
         {
             ProgressBar_api.Value = e.CompletePercentage;
+            if(e.CompletePercentage != 100)
+            {
+                LabelApiProgress.Content = $"Loading... {e.CompletePercentage}%";
+            }
+            else
+            {
+                LabelApiProgress.Content = $"Countries loaded from the API on {DateTime.UtcNow}";
+            }
+            
+        }
+
+        private void DatabaseReportProgress(object sender, ProgressReport e)
+        {
+            ProgressBar_database.Value = e.CompletePercentage;
+            LabelDatabaseProgress.Content = $"{e.CompletePercentage}%";
+            if(e.CompletePercentage != 100)
+            {
+                LabelDatabaseProgress.Content = $"Saving... {e.CompletePercentage}%";
+            }
+            else
+            {
+                LabelDatabaseProgress.Content = "Countries saved to the database";
+            }
         }
 
         private void LoadLocalRates()
@@ -94,6 +120,8 @@
 
         private async Task LoadApiRates()
         {
+            ProgressBar_api.Visibility = Visibility.Visible;
+
             Progress<ProgressReport> apiProgress = new Progress<ProgressReport>();
             apiProgress.ProgressChanged += ReportProgress;
 
@@ -103,18 +131,23 @@
 
             dataService.DeleteData();
 
-            dataService.SaveData(Countries);
+            Progress<ProgressReport> databaseProgress = new Progress<ProgressReport>();
+            databaseProgress.ProgressChanged += DatabaseReportProgress;
+
+            ProgressBar_database.Visibility = Visibility.Visible;
+
+            dataService.SaveData(Countries, databaseProgress);
         }
 
         private void ComboBox_countries_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             country = (Country) ComboBox_countries.SelectedItem;
 
-            TextBox_capital.Text = country.Capital;
-            TextBox_gini.Text = country.Gini.ToString();
-            TextBox_population.Text = country.Population.ToString();
-            TextBox_region.Text = country.Region;
-            TextBox_subregion.Text = country.Subregion;
+            TextBox_capital.Text = CheckEmptyStrings(country.Capital);
+            TextBox_gini.Text = CheckEmptyStrings(country.Gini.ToString());
+            TextBox_population.Text = CheckEmptyStrings(country.Population.ToString());
+            TextBox_region.Text = CheckEmptyStrings(country.Region);
+            TextBox_subregion.Text = CheckEmptyStrings(country.Subregion);
             Image_flag.Source = dataService.GetFlag(country);
         }
 
@@ -127,6 +160,22 @@
         {
             DetailsWindow details = new DetailsWindow(country);
             details.Show();
+        }
+
+        private string CheckEmptyStrings(string field)
+        {
+            if (string.IsNullOrWhiteSpace(field))
+            {
+                return "N/A";
+            }
+            else if(field == "0")
+            {
+                return "N/A";
+            }
+            else
+            {
+                return field;
+            }
         }
     }
 }

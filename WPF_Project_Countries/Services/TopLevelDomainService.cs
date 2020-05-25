@@ -37,12 +37,13 @@
             }
         }
 
-        public async Task SaveTopLevelDomainAsync(Country country)
+        public async Task SaveTopLevelDomainAsync(List<string> topLevelDomains, string alpha3code)
         {
-            await Task.Run(() => {
-                foreach (string topLevelDomain in country.TopLevelDomain)
+            await Task.Run(() =>
+            {
+                foreach (string topLevelDomain in topLevelDomains)
                 {
-                    command.Parameters.AddWithValue("@alpha3code", country.Alpha3Code);
+                    command.Parameters.AddWithValue("@alpha3code", alpha3code);
                     command.Parameters.AddWithValue("@topLevelDomain", topLevelDomain);
 
                     command.CommandText = "insert into topLevelDomains values(@alpha3code, @topLevelDomain)";
@@ -52,35 +53,42 @@
                     command.ExecuteNonQuery();
                 }
             });
+
+            //await Task.Run(() => {
+            //    foreach (string topLevelDomain in topLevelDomains)
+            //    {
+            //        string sql = $"insert into topLevelDomains values('{alpha3code}', '{topLevelDomain}')";
+
+            //        command = new SQLiteCommand(sql, connection);
+
+            //        command.ExecuteNonQuery();
+            //    }
+            //});
         }
 
-        private void GetTopLevelDomains(List<Country> countries)
+        public void GetTopLevelDomains(Country country)
         {
             try
             {
-                string sql = "select topLevelDomain from topLevelDomains";
+                string sql = $"select alpha3code, topLevelDomain from topLevelDomains where alpha3code = '{country.Alpha3Code}'";
 
                 command = new SQLiteCommand(sql, connection);
 
                 SQLiteDataReader reader = command.ExecuteReader();
 
+                country.TopLevelDomain = new List<string>();
+
                 while (reader.Read())
                 {
-                    foreach (var country in countries)
-                    {
-                        while (reader["alpha3code"].ToString() == country.Alpha3Code)
-                        {
-                            country.TopLevelDomain.Add(reader["topLevelDomain"].ToString());
-                        }
-                    }
-
+                    country.TopLevelDomain.Add(reader["topLevelDomain"].ToString());
                 }
 
-                connection.Close();
+                //connection.Close();
             }
             catch (Exception e)
             {
                 dialogService.ShowMessage("Erro", e.Message);
+
             }
         }
     }

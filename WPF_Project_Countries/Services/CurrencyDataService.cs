@@ -37,13 +37,13 @@
             }
         }
 
-        public async Task SaveCurrencyAsync(Country country)
+        public async Task SaveCurrencyAsync(List<Currency> currencies, string alpha3code)
         {
             await Task.Run(() =>
             {
-                foreach (Currency currency in country.Currencies)
+                foreach (Currency currency in currencies)
                 {
-                    command.Parameters.AddWithValue("@alpha3code", country.Alpha3Code);
+                    command.Parameters.AddWithValue("@alpha3code", alpha3code);
                     command.Parameters.AddWithValue("@code", currency.Code);
                     command.Parameters.AddWithValue("@name", currency.Name);
                     command.Parameters.AddWithValue("@symbol", currency.Symbol);
@@ -55,6 +55,46 @@
                     command.ExecuteNonQuery();
                 }
             });
+
+            //await Task.Run(() => {
+            //    foreach (Currency currency in currencies)
+            //    {
+            //        string sql = $"insert into currencies values('{alpha3code}', '{currency.Code}', \"{currency.Name}\", \"{currency.Symbol}\")";
+
+            //        command = new SQLiteCommand(sql, connection);
+
+            //        command.ExecuteNonQuery();
+            //    }
+            //});
+        }
+
+        public void GetCurrencies(Country country)
+        {
+            try
+            {
+                string sql = $"select alpha3code, code, name, symbol from currencies where alpha3code = '{country.Alpha3Code}'";
+
+                command = new SQLiteCommand(sql, connection);
+
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                country.Currencies = new List<Currency>();
+
+                while (reader.Read())
+                {
+                    country.Currencies.Add(new Currency { 
+                    Code = reader["code"].ToString(),
+                    Name = reader["name"].ToString(),
+                    Symbol = reader["symbol"].ToString()
+                    });
+                }
+
+                //connection.Close();
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Erro", e.Message);
+            }
         }
     }
 }

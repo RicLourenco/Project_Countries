@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPF_Project_Countries"
         mc:Ignorable="d"
-        Title="DetailsWindow" Height="486.486" Width="800" Closing="Window_Closing">
+        Title="DetailsWindow" Height="587.486" Width="1262.946" Closing="Window_Closing">
     <Grid>
         <Label Content="Alpha 2 code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15,35,0,0"/>
         <Label Content="Currencies" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="30,242,0,0"/>
@@ -18,16 +18,49 @@
         <ListBox x:Name="ListBox_topLevelDomains" HorizontalAlignment="Left" Height="59" VerticalAlignment="Top" Width="37" Margin="120,178,0,0" IsEnabled="False"/>
         <TextBox x:Name="TextBox_cioc" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="47" Margin="100,66,0,0" IsEnabled="False" RenderTransformOrigin="2.57,-1.203"/>
         <TextBox x:Name="TextBox_numericCode" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="47" Margin="100,150,0,0" IsEnabled="False"/>
-        <TextBox x:Name="TextBox_nativeName" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="167" Margin="100,122,0,0" IsEnabled="False"/>
-        <TextBox x:Name="TextBox_denonym" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="162" Margin="100,94,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_nativeName" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="238" Margin="100,122,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_denonym" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="238" Margin="100,94,0,0" IsEnabled="False"/>
         <TextBox x:Name="TextBox_alpha3" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="51" Margin="100,10,0,0" IsEnabled="False"/>
         <TextBox x:Name="TextBox_alpha2" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="51" Margin="100,38,0,0" IsEnabled="False"/>
-        <Button Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="707,389,0,0" Click="Button_Click"/>
+        <Button Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="1170,526,0,0" Click="Button_Click"/>
         <DataGrid x:Name="GridView_currencies" HorizontalAlignment="Left" Height="84" VerticalAlignment="Top" Width="238" Margin="100,242,0,0" CanUserResizeRows="False" SelectionMode="Single" IsReadOnly="True"/>
         <Label Content="Languages" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,331,0,0"/>
         <DataGrid x:Name="GridView_languages" HorizontalAlignment="Left" Height="97" VerticalAlignment="Top" Width="283" Margin="100,331,0,0" IsReadOnly="True"/>
-        <Label Content="Translations" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="311,10,0,0"/>
-        <Label Content="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="422,250,0,0"/>
+        <Label Content="Borders" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="460,115,0,0"/>
+        <Label Content="Alternate spellings" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="402,10,0,0"/>
+        <ListBox x:Name="ListBox_altSpellings" HorizontalAlignment="Left" Height="100" Margin="516,10,0,0" VerticalAlignment="Top" Width="194"/>
+        <ListBox x:Name="ListBox_borders" HorizontalAlignment="Left" Height="100" Margin="516,115,0,0" VerticalAlignment="Top" Width="100"/>
+        <Label Content="Calling codes" HorizontalAlignment="Left" Margin="430,220,0,0" VerticalAlignment="Top"/>
+        <ListBox x:Name="ListBox_callingCodes" HorizontalAlignment="Left" Height="55" VerticalAlignment="Top" Width="62" Margin="516,220,0,0"/>
+        <Label Content="Latitude&#xD;&#xA;&amp; longitude" HorizontalAlignment="Left" Margin="436,280,0,0" VerticalAlignment="Top"/>
+        <Label Content="Time zones" HorizontalAlignment="Left" Margin="441,331,0,0" VerticalAlignment="Top" Width="79"/>
+        <ListBox x:Name="ListBox_latlng" HorizontalAlignment="Left" Height="46" Margin="516,280,0,0" VerticalAlignment="Top" Width="100"/>
+        <ListBox x:Name="ListBox_timeZones" HorizontalAlignment="Left" Height="97" Margin="526,331,0,0" VerticalAlignment="Top" Width="90"/>
+        <Label Content="Translations" HorizontalAlignment="Left" Margin="801,12,0,0" VerticalAlignment="Top"/>
+        <Label Content="Brazillian portuguese" HorizontalAlignment="Left" Margin="752,198,0,0" VerticalAlignment="Top"/>
+        <Label Content="Persian" HorizontalAlignment="Left" Margin="825,322,0,0" VerticalAlignment="Top"/>
+        <Label Content="Croatian" HorizontalAlignment="Left" Margin="818,291,0,0" VerticalAlignment="Top"/>
+        <Label Content="Dutch" HorizontalAlignment="Left" Margin="831,260,0,0" VerticalAlignment="Top"/>
+        <Label Content="Italian" HorizontalAlignment="Left" Margin="831,167,0,0" VerticalAlignment="Top"/>
+        <Label Content="Portuguese" HorizontalAlignment="Left" Margin="803,229,0,0" VerticalAlignment="Top"/>
+        <Label Content="French" HorizontalAlignment="Left" Margin="828,105,0,0" VerticalAlignment="Top"/>
+        <Label Content="Japanese" HorizontalAlignment="Left" Margin="815,136,0,0" VerticalAlignment="Top"/>
+        <Label Content="Spanish" HorizontalAlignment="Left" Margin="822,74,0,0" VerticalAlignment="Top"/>
+        <Label Content="German" HorizontalAlignment="Left" Margin="821,43,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="TextBox_br" HorizontalAlignment="Left" Height="23" Margin="878,201,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_it" HorizontalAlignment="Left" Height="23" Margin="878,170,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_ja" HorizontalAlignment="Left" Height="23" Margin="878,139,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_fr" HorizontalAlignment="Left" Height="23" Margin="878,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_es" HorizontalAlignment="Left" Height="23" Margin="878,77,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_de" HorizontalAlignment="Left" Height="23" Margin="878,46,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_pt" HorizontalAlignment="Left" Height="23" Margin="878,232,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_nl" HorizontalAlignment="Left" Height="23" Margin="878,263,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_hr" HorizontalAlignment="Left" Height="23" Margin="878,294,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_fa" HorizontalAlignment="Left" Height="23" Margin="878,325,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="255" IsEnabled="False"/>
+        <DataGrid x:Name="GridView_regionalBlocs" HorizontalAlignment="Left" Height="100" Margin="100,433,0,0" VerticalAlignment="Top" Width="213"/>
+        <Label Content="Regional blocks" HorizontalAlignment="Left" Margin="2,433,0,0" VerticalAlignment="Top"/>
+        <ListBox x:Name="ListBox_otherAcronyms" HorizontalAlignment="Left" Height="100" Margin="318,433,0,0" VerticalAlignment="Top" Width="109"/>
+        <ListBox x:Name="ListBox_otherNames" HorizontalAlignment="Left" Height="100" Margin="432,433,0,0" VerticalAlignment="Top" Width="184"/>
 
     </Grid>
 </Window>

@@ -44,9 +44,10 @@
                 connection = new SQLiteConnection("Data Source=" + path);
                 connection.Open();
 
-                string sqlcommand = "create table if not exists countries(name varchar(50), alpha2code char(2), alpha3code char(3) primary key, capital varchar(50), region varchar(50), subregion varchar(50), population integer, denonym varchar(50), area real, gini real, nativeName varchar(50), numericCode varchar(20), cioc varchar(20));";
+                string sqlcommand = "create table if not exists countries(name varchar(50), alpha2code char(2), alpha3code char(3) primary key, capital varchar(50), region varchar(50), subregion varchar(50), population integer, denonym varchar(50), area real, gini real, nativeName varchar(50), numericCode varchar(20), cioc varchar(20));" +
+                    "create table if not exists dbState(state boolean not null check(state in(0,1)));";
 
-                //CreateOtherTables();
+                CreateOtherTables();
 
                 command = new SQLiteCommand(sqlcommand, connection);
 
@@ -76,11 +77,15 @@
         /// Receives a C# list of countries and inserts them into the countries sqlite table
         /// </summary>
         /// <param name="countries"></param>
-        public async Task SaveData(List<Country> countries)
+        public async Task SaveData(List<Country> countries, IProgress<ProgressReport> progress)
         {
+            ProgressReport report = new ProgressReport();
+            byte i = 1;
+
             try
             {
-                await Task.Run(async () => {
+                await Task.Run(async () =>
+                {
                     foreach (Country country in countries)
                     {
                         command.Parameters.AddWithValue("@name", country.Name);
@@ -103,11 +108,39 @@
 
                         command.ExecuteNonQuery();
 
-                        //await SaveDataToOtherTables(country);
+                        await SaveDataToOtherTables(country);
+
+                        report.CompletePercentage = Convert.ToByte((i * 100) / countries.Count);
+                        progress.Report(report);
+                        i++;
                     }
+                });
+
+                //await Task.Run(async () =>
+                //{
+                //   foreach (Country country in countries)
+                //   {
+                //       string sql = $"insert into countries values(\"{country.Name}\", '{country.Alpha2Code}', '{country.Alpha3Code}', \"{country.Capital}\", \"{country.Region}\", \"{country.Subregion}\", {country.Population}, \"{country.Demonym}\", '{country.Area}', '{country.Gini}', \"{country.NativeName}\", '{country.NumericCode}', '{country.Cioc}')";
+
+                //       command = new SQLiteCommand(sql, connection);
+
+                //       command.ExecuteNonQuery();
+
+                //       await SaveDataToOtherTables(country);
+
+                //       report.CompletePercentage = Convert.ToByte((i * 100) / countries.Count);
+                //       progress.Report(report);
+                //       i++;
+                //   }
+                //});
+
+                    string sqlcommand = "update dbState set state = 1";
+
+                    command = new SQLiteCommand(sqlcommand, connection);
+
+                    command.ExecuteNonQuery();
 
                     connection.Close();
-                });
             }
             catch (Exception e)
             {
@@ -117,18 +150,18 @@
 
         private async Task SaveDataToOtherTables(Country country)
         {
-            
-            await altSpellings.SaveAltSpellings(country);
-            await borders.SaveBordersAsync(country);
-            await callingCodes.SaveCallingCodesAsync(country);
-            await currency.SaveCurrencyAsync(country);
-            await language.SaveLanguageAsync(country);
-            await latlngs.SaveLatlngsAsync(country);
-            //await regionalBloc.SaveRegionalBlocAsync(country);
-            await timeZones.SaveTimeZonesAsync(country);
-            await topLevelDomain.SaveTopLevelDomainAsync(country);
-            await translations.SaveTranslationsAsync(country);
-            
+
+            await altSpellings.SaveAltSpellings(country.AltSpellings, country.Alpha3Code);
+            await borders.SaveBordersAsync(country.Borders, country.Alpha3Code);
+            await callingCodes.SaveCallingCodesAsync(country.CallingCodes, country.Alpha3Code);
+            await currency.SaveCurrencyAsync(country.Currencies, country.Alpha3Code);
+            await language.SaveLanguageAsync(country.Languages, country.Alpha3Code);
+            await latlngs.SaveLatlngsAsync(country.Latlng, country.Alpha3Code);
+            await regionalBloc.SaveRegionalBlocAsync(country.RegionalBlocs, country.Alpha3Code);
+            await timeZones.SaveTimeZonesAsync(country.Timezones, country.Alpha3Code);
+            await topLevelDomain.SaveTopLevelDomainAsync(country.TopLevelDomain, country.Alpha3Code);
+            await translations.SaveTranslationsAsync(country.Translations, country.Alpha3Code);
+
         }
 
         /// <summary>
@@ -139,13 +172,27 @@
         {
             List<Country> countries = new List<Country>();
 
+            string check = "select * from dbState";
+
+            command = new SQLiteCommand(check, connection);
+
+            SQLiteDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                if(Convert.ToByte(reader["state"]) == 0)
+                {
+                    return null;
+                }
+            }
+
             try
             {
                 string sql = "select name, alpha2code, alpha3code, capital, region, subregion, population, denonym, area, gini, nativeName, numericCode, cioc from countries";
 
                 command = new SQLiteCommand(sql, connection);
 
-                SQLiteDataReader reader = command.ExecuteReader();
+                reader = command.ExecuteReader();
 
                 while (reader.Read())
                 {
@@ -167,7 +214,10 @@
                     });
                 }
 
+                GetDataFromOtherTables(countries);
+
                 connection.Close();
+
                 return countries;
             }
             catch (Exception e)
@@ -177,9 +227,21 @@
             }
         }
 
-        private void GetDataFromOtherTables()
+        private void GetDataFromOtherTables(List<Country> countries)
         {
-
+            foreach (Country country in countries)
+            {
+                altSpellings.GetAltSpellings(country);
+                borders.GetAltBorders(country);
+                callingCodes.GetCallingCodes(country);
+                currency.GetCurrencies(country);
+                language.GetLanguages(country);
+                latlngs.GetLatlngs(country);
+                timeZones.GetTimeZones(country);
+                topLevelDomain.GetTopLevelDomains(country);
+                translations.GetTranslations(country);
+                regionalBloc.GetRegionalBlocs(country);
+            }
         }
 
         /// <summary>
@@ -190,7 +252,8 @@
             try
             {
                 string sql = "begin;" +
-                    /*"delete from altSpellings;" +
+                    "delete from dbState;" +
+                    "delete from altSpellings;" +
                     "delete from borders;" +
                     "delete from callingCodes;" +
                     "delete from currencies;" +
@@ -201,8 +264,9 @@
                     "delete from regionalBlocs;" +
                     "delete from timeZones;" +
                     "delete from topLevelDomains;" +
-                    "delete from translations;" +*/
+                    "delete from translations;" +
                     "delete from countries;" +
+                    "insert into dbState(state) values(0);" +
                     "commit;";
 
                 command = new SQLiteCommand(sql, connection);

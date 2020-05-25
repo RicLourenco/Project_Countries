@@ -37,12 +37,13 @@
             }
         }
 
-        public async Task SaveTimeZonesAsync(Country country)
+        public async Task SaveTimeZonesAsync(List<string> timeZones, string alpha3code)
         {
-            await Task.Run(() => {
-                foreach (string timeZone in country.Timezones)
+            await Task.Run(() =>
+            {
+                foreach (string timeZone in timeZones)
                 {
-                    command.Parameters.AddWithValue("@alpha3code", country.Alpha3Code);
+                    command.Parameters.AddWithValue("@alpha3code", alpha3code);
                     command.Parameters.AddWithValue("@timeZone", timeZone);
 
                     command.CommandText = "insert into timeZones values(@alpha3code, @timeZone)";
@@ -52,35 +53,42 @@
                     command.ExecuteNonQuery();
                 }
             });
+
+            //await Task.Run(() => {
+            //    foreach (string timeZone in timeZones)
+            //    {
+            //        string sql = $"insert into timeZones values('{alpha3code}', '{timeZone}')";
+
+            //        command = new SQLiteCommand(sql, connection);
+
+            //        command.ExecuteNonQuery();
+            //    }
+            //});
         }
 
-        public void GetTimeZones(List<Country> countries)
+        public void GetTimeZones(Country country)
         {
             try
             {
-                string sql = "select timeZone from timeZones";
+                string sql = $"select alpha3code, timeZone from timeZones where alpha3code = '{country.Alpha3Code}'";
 
                 command = new SQLiteCommand(sql, connection);
 
                 SQLiteDataReader reader = command.ExecuteReader();
 
+                country.Timezones = new List<string>();
+
                 while (reader.Read())
                 {
-                    foreach (var country in countries)
-                    {
-                        while (reader["alpha3code"].ToString() == country.Alpha3Code)
-                        {
-                            country.Timezones.Add(reader["timeZone"].ToString());
-                        }
-                    }
-
+                    country.Timezones.Add(reader["timeZone"].ToString());
                 }
 
-                connection.Close();
+                //connection.Close();
             }
             catch (Exception e)
             {
                 dialogService.ShowMessage("Erro", e.Message);
+
             }
         }
     }

@@ -8,7 +8,7 @@
         Title="Countries" Height="497" Width="521">
     <Grid>
         <ComboBox x:Name="ComboBox_countries" HorizontalAlignment="Left" VerticalAlignment="Top" Width="237" Margin="10,58,0,0" SelectionChanged="ComboBox_countries_SelectionChanged"/>
-        <Label x:Name="Label_status" Content="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,352,0,0"/>
+        <Label x:Name="Label_status" Content="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,352,0,0" Visibility="Hidden"/>
         <Button x:Name="Button_close" Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="428,436,0,0" Click="Button_close_Click"/>
         <TextBox x:Name="TextBox_region" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="10,160,0,0" IsEnabled="False"/>
         <TextBox x:Name="TextBox_subregion" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="248,160,0,0" IsEnabled="False"/>
@@ -22,8 +22,10 @@
         <Label Content="Region&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,129,0,0" Width="120"/>
         <Image x:Name="Image_flag" HorizontalAlignment="Left" Height="95" VerticalAlignment="Top" Width="185" Margin="304,29,0,0"/>
         <Button x:Name="Button_details" Content="Show country details" HorizontalAlignment="Left" VerticalAlignment="Top" Width="179" Margin="248,315,0,0" Height="23" Click="Button_details_Click" IsEnabled="False"/>
-        <ProgressBar x:Name="ProgressBar_api" HorizontalAlignment="Left" Height="20" Margin="10,436,0,0" VerticalAlignment="Top" Width="157"/>
-        <ProgressBar x:Name="ProgressBar_database" HorizontalAlignment="Left" Height="20" Margin="172,436,0,0" VerticalAlignment="Top" Width="157"/>
+        <ProgressBar x:Name="ProgressBar_api" HorizontalAlignment="Left" Height="20" Margin="10,399,0,0" VerticalAlignment="Top" Width="157" Visibility="Hidden"/>
+        <ProgressBar x:Name="ProgressBar_database" HorizontalAlignment="Left" Height="20" Margin="10,430,0,0" VerticalAlignment="Top" Width="157" Visibility="Hidden"/>
+        <Label x:Name="LabelApiProgress" Content="" HorizontalAlignment="Left" Margin="172,396,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="LabelDatabaseProgress" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="172,427,0,0"/>
 
     </Grid>
 </Window>

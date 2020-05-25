@@ -37,13 +37,13 @@
             }
         }
 
-        public async Task SaveBordersAsync(Country country)
+        public async Task SaveBordersAsync(List<string> borders, string alpha3code)
         {
             await Task.Run(() =>
             {
-                foreach (string border in country.Borders)
+                foreach (string border in borders)
                 {
-                    command.Parameters.AddWithValue("@alpha3code", country.Alpha3Code);
+                    command.Parameters.AddWithValue("@alpha3code", alpha3code);
                     command.Parameters.AddWithValue("@border", border);
 
                     command.CommandText = "insert into borders values(@alpha3code, @border)";
@@ -53,31 +53,39 @@
                     command.ExecuteNonQuery();
                 }
             });
+
+            //await Task.Run(() => {
+            //    foreach (string border in borders)
+            //    {
+            //        string sql = $"insert into borders values('{alpha3code}', '{border}')";
+
+            //        command = new SQLiteCommand(sql, connection);
+
+            //        command.ExecuteNonQuery();
+            //    }
+            //});
+
+            //connection.Close();
         }
 
-        private void GetBorders(List<Country> countries)
+        public void GetAltBorders(Country country)
         {
             try
             {
-                string sql = "select border from borders";
+                string sql = $"select alpha3code, border from borders where alpha3code = '{country.Alpha3Code}'";
 
                 command = new SQLiteCommand(sql, connection);
 
                 SQLiteDataReader reader = command.ExecuteReader();
 
+                country.Borders = new List<string>();
+
                 while (reader.Read())
                 {
-                    foreach (var country in countries)
-                    {
-                        while (reader["alpha3code"].ToString() == country.Alpha3Code)
-                        {
-                            country.Borders.Add(reader["border"].ToString());
-                        }
-                    }
-
+                    country.Borders.Add(reader["border"].ToString());
                 }
 
-                connection.Close();
+                //connection.Close();
             }
             catch (Exception e)
             {

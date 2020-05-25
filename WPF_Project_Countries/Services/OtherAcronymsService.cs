@@ -25,7 +25,7 @@
                 connection = new SQLiteConnection("Data Source=" + path);
                 connection.Open();
 
-                string sqlcommand = "create table if not exists otherAcronyms(id_regionalBloc integer, otherAcronym varchar(50), foreign key (id_regionalBloc) references regionalBloc(id));";
+                string sqlcommand = "create table if not exists otherAcronyms(id_regionalBloc int, otherAcronym varchar(50), foreign key (id_regionalBloc) references regionalBloc(id));";
 
                 command = new SQLiteCommand(sqlcommand, connection);
 
@@ -37,57 +37,60 @@
             }
         }
 
-        public async Task SaveOtherAcronymsAsync(RegionalBloc regionalBloc)
+        public async Task SaveOtherAcronymsAsync(List<string> otherAcronyms)
         {
             await Task.Run(() =>
             {
-                foreach (string otherAcronyms in regionalBloc.OtherAcronyms)
+                foreach (string otherAcronym in otherAcronyms)
                 {
-                    //command.Parameters.AddWithValue("@id_regionalBloc", );
-                    command.Parameters.AddWithValue("@otherAcronym", regionalBloc.Acronym);
+                    command.Parameters.AddWithValue("@otherAcronym", otherAcronym);
 
-                    command.CommandText = "insert into regionalBlocs values(@id_regionalBloc, @otherAcronym)";
+                    command.CommandText = "insert into otherAcronyms values((select id from regionalBlocs order by id desc limit 1), @otherAcronym)";
 
                     command.Connection = connection;
 
                     command.ExecuteNonQuery();
                 }
             });
+
+            //await Task.Run(() => {
+            //    foreach (string otherAcronym in otherAcronyms)
+            //    {
+            //        string sql = $"insert into otherAcronyms values((select id from regionalBlocs order by id desc limit 1), '{otherAcronym}')";
+
+            //        command = new SQLiteCommand(sql, connection);
+
+            //        command.ExecuteNonQuery();
+            //    }
+            //});
         }
 
-        private void GetOtherAcronyms(List<Country> countries)
+        public List<string> GetOtherAcronyms(string id)
         {
-            /*
             try
             {
-                string sql = "select otherAcronym from otherAcronyms";
+                string sql = $"select otherAcronym from otherAcronyms where id_regionalBloc = '{id}'";
 
                 command = new SQLiteCommand(sql, connection);
 
                 SQLiteDataReader reader = command.ExecuteReader();
 
+                List<string> otherAcronyms = new List<string>();
+
                 while (reader.Read())
                 {
-                    foreach (var country in countries)
-                    {
-                        foreach(var regionalBloc in country.RegionalBlocs)
-                        {
-                            while (reader["id_regionalBloc"].ToString() == country.RegionalBlocs)
-                            {
-                                country.TopLevelDomain.Add(reader["otherAcronym"].ToString());
-                            }
-                        }
-                    }
-
+                    otherAcronyms.Add(reader["otherAcronym"].ToString());
                 }
 
-                connection.Close();
+                return otherAcronyms;
+
+                //connection.Close();
             }
             catch (Exception e)
             {
                 dialogService.ShowMessage("Erro", e.Message);
+                return null;
             }
-            */
         }
     }
 }

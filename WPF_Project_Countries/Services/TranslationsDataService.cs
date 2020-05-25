@@ -37,21 +37,21 @@
             }
         }
 
-        public async Task SaveTranslationsAsync(Country country)
+        public async Task SaveTranslationsAsync(Translations translations, string alpha3code)
         {
             await Task.Run(() =>
             {
-                command.Parameters.AddWithValue("@alpha3code", country.Alpha3Code);
-                command.Parameters.AddWithValue("@de", country.Translations.De);
-                command.Parameters.AddWithValue("@es", country.Translations.Es);
-                command.Parameters.AddWithValue("@fr", country.Translations.Fr);
-                command.Parameters.AddWithValue("@ja", country.Translations.Ja);
-                command.Parameters.AddWithValue("@it", country.Translations.It);
-                command.Parameters.AddWithValue("@br", country.Translations.Br);
-                command.Parameters.AddWithValue("@pt", country.Translations.Pt);
-                command.Parameters.AddWithValue("@nl", country.Translations.Nl);
-                command.Parameters.AddWithValue("@hr", country.Translations.Hr);
-                command.Parameters.AddWithValue("@fa", country.Translations.Fa);
+                command.Parameters.AddWithValue("@alpha3code", alpha3code);
+                command.Parameters.AddWithValue("@de", translations.De);
+                command.Parameters.AddWithValue("@es", translations.Es);
+                command.Parameters.AddWithValue("@fr", translations.Fr);
+                command.Parameters.AddWithValue("@ja", translations.Ja);
+                command.Parameters.AddWithValue("@it", translations.It);
+                command.Parameters.AddWithValue("@br", translations.Br);
+                command.Parameters.AddWithValue("@pt", translations.Pt);
+                command.Parameters.AddWithValue("@nl", translations.Nl);
+                command.Parameters.AddWithValue("@hr", translations.Hr);
+                command.Parameters.AddWithValue("@fa", translations.Fa);
 
                 command.CommandText = "insert into translations values(@alpha3code, @de, @es, @fr, @ja, @it, @br, @pt, @nl, @hr, @fa)";
 
@@ -59,6 +59,49 @@
 
                 command.ExecuteNonQuery();
             });
+
+            //await Task.Run(() => {
+            //    string sql = $"insert into translations values('{alpha3code}', \"{translations.De}\", \"{translations.Es}\", \"{translations.Fr}\", \"{translations.Ja}\", \"{translations.It}\", \"{translations.Br}\", \"{translations.Pt}\", \"{translations.Nl}\", \"{translations.Hr}\", \"{translations.Fa}\")";
+
+            //    command = new SQLiteCommand(sql, connection);
+
+            //    command.ExecuteNonQuery();
+            //});
+        }
+
+        public void GetTranslations(Country country)
+        {
+            try
+            {
+                string sql = $"select alpha3code, de, es, fr, ja, it, br, pt, nl, hr, fa from translations where alpha3code = '{country.Alpha3Code}'";
+
+                command = new SQLiteCommand(sql, connection);
+
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    country.Translations = (new Translations
+                    {
+                        De = reader["de"].ToString(),
+                        Es = reader["es"].ToString(),
+                        Fr = reader["fr"].ToString(),
+                        Ja = reader["ja"].ToString(),
+                        It = reader["it"].ToString(),
+                        Br = reader["br"].ToString(),
+                        Pt = reader["pt"].ToString(),
+                        Nl = reader["nl"].ToString(),
+                        Hr = reader["hr"].ToString(),
+                        Fa = reader["fa"].ToString()
+                    });
+                }
+
+                //connection.Close();
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Erro", e.Message);
+            }
         }
     }
 }

@@ -35,5 +35,61 @@ namespace WPF_Project_Countries.Services
                 dialogService.ShowMessage("Erro", e.Message);
             }
         }
+
+        public async Task SaveOtherNamesAsync(List<string> otherNames)
+        {
+            await Task.Run(() =>
+            {
+                foreach (string otherName in otherNames)
+                {
+                    command.Parameters.AddWithValue("@otherName", otherName);
+
+                    command.CommandText = "insert into otherNames values((select id from regionalBlocs order by id desc limit 1), @otherName)";
+
+                    command.Connection = connection;
+
+                    command.ExecuteNonQuery();
+                }
+            });
+
+            //await Task.Run(() => {
+            //    foreach (string otherName in otherNames)
+            //    {
+            //        string sql = $"insert into otherNames values((select id from regionalBlocs order by id desc limit 1), \"{otherName}\")";
+
+            //        command = new SQLiteCommand(sql, connection);
+
+            //        command.ExecuteNonQuery();
+            //    }
+            //});
+        }
+
+        public List<string> GetOtherNames(string id)
+        {
+            try
+            {
+                string sql = $"select otherName from otherNames where id_regionalBloc = '{id}'";
+
+                command = new SQLiteCommand(sql, connection);
+
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                List<string> otherNames = new List<string>();
+
+                while (reader.Read())
+                {
+                    otherNames.Add(reader["otherName"].ToString());
+                }
+
+                return otherNames;
+
+                //connection.Close();
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Erro", e.Message);
+                return null;
+            }
+        }
     }
 }

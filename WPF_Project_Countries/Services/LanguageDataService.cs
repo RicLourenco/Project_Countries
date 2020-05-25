@@ -37,13 +37,13 @@
             }
         }
 
-        public async Task SaveLanguageAsync(Country country)
+        public async Task SaveLanguageAsync(List<Language> languages, string alpha3code)
         {
             await Task.Run(() =>
             {
-                foreach (Language language in country.Languages)
+                foreach (Language language in languages)
                 {
-                    command.Parameters.AddWithValue("@alpha3code", country.Alpha3Code);
+                    command.Parameters.AddWithValue("@alpha3code", alpha3code);
                     command.Parameters.AddWithValue("@iso639_1", language.Iso639_1);
                     command.Parameters.AddWithValue("@iso639_2", language.Iso639_2);
                     command.Parameters.AddWithValue("@name", language.Name);
@@ -56,6 +56,48 @@
                     command.ExecuteNonQuery();
                 }
             });
+
+            //await Task.Run(() => {
+            //    foreach (Language language in languages)
+            //    {
+            //        string sql =  $"insert into languages values('{alpha3code}', '{language.Iso639_1}', '{language.Iso639_2}', \"{language.Name}\", \"{language.NativeName}\")";
+
+            //        command = new SQLiteCommand(sql, connection);
+
+            //        command.ExecuteNonQuery();
+            //    }
+            //});
+        }
+
+        public void GetLanguages(Country country)
+        {
+            try
+            {
+                string sql = $"select alpha3code, iso639_1, iso639_2, name, nativeName from languages where alpha3code = '{country.Alpha3Code}'";
+
+                command = new SQLiteCommand(sql, connection);
+
+                SQLiteDataReader reader = command.ExecuteReader();
+
+                country.Languages = new List<Language>();
+
+                while (reader.Read())
+                {
+                    country.Languages.Add(new Language
+                    {
+                        Iso639_1 = reader["iso639_1"].ToString(),
+                        Iso639_2 = reader["iso639_2"].ToString(),
+                        Name = reader["name"].ToString(),
+                        NativeName = reader["nativeName"].ToString()
+                    });
+                }
+
+                //connection.Close();
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Erro", e.Message);
+            }
         }
     }
 }

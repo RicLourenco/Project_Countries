@@ -37,12 +37,13 @@
             }
         }
 
-        public async Task SaveAltSpellings(Country country)
+        public async Task SaveAltSpellings(List<string> altSpellings, string alpha3code)
         {
-            await Task.Run(() => {
-                foreach (string altSpelling in country.AltSpellings)
+            await Task.Run(() =>
+            {
+                foreach (string altSpelling in altSpellings)
                 {
-                    command.Parameters.AddWithValue("@alpha3code", country.Alpha3Code);
+                    command.Parameters.AddWithValue("@alpha3code", alpha3code);
                     command.Parameters.AddWithValue("@altSpelling", altSpelling);
 
                     command.CommandText = "insert into altSpellings values(@alpha3code, @altSpelling)";
@@ -52,32 +53,40 @@
                     command.ExecuteNonQuery();
                 }
             });
-            
+
+            //await Task.Run(() => {
+            //    foreach (string altSpelling in altSpellings)
+            //    {
+            //        string sql = $"insert into altSpellings values('{alpha3code}', \"{altSpelling}\")";
+
+            //        command = new SQLiteCommand(sql, connection);
+
+            //        command.ExecuteNonQuery();
+            //    }
+            //});
+
+            //connection.Close();
+
         }
 
-        public void GetAltSpellings(List<Country> countries)
+        public void GetAltSpellings(Country country)
         {
             try
             {
-                string sql = "select alpha3code, altSpelling from altSpellings";
+                string sql = $"select alpha3code, altSpelling from altSpellings where alpha3code = '{country.Alpha3Code}'";
 
                 command = new SQLiteCommand(sql, connection);
 
                 SQLiteDataReader reader = command.ExecuteReader();
 
+                country.AltSpellings = new List<string>();
+
                 while (reader.Read())
                 {
-                    foreach (var country in countries)
-                    {
-                        while (reader["alpha3code"].ToString() == country.Alpha3Code)
-                        {
-                            country.AltSpellings.Add(reader["altSpelling"].ToString());
-                        }
-                    }
-
+                    country.AltSpellings.Add(reader["altSpelling"].ToString());
                 }
 
-                connection.Close();
+                //connection.Close();
             }
             catch (Exception e)
             {

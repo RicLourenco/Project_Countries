@@ -37,12 +37,13 @@
             }
         }
 
-        public async Task SaveLatlngsAsync(Country country)
+        public async Task SaveLatlngsAsync(List<double> latlngs, string alpha3code)
         {
-            await Task.Run(() => {
-                foreach (double latlng in country.Latlng)
+            await Task.Run(() =>
+            {
+                foreach (double latlng in latlngs)
                 {
-                    command.Parameters.AddWithValue("@alpha3code", country.Alpha3Code);
+                    command.Parameters.AddWithValue("@alpha3code", alpha3code);
                     command.Parameters.AddWithValue("@latlng", latlng);
 
                     command.CommandText = "insert into latlngs values(@alpha3code, @latlng)";
@@ -52,30 +53,37 @@
                     command.ExecuteNonQuery();
                 }
             });
+
+            //await Task.Run(() => {
+            //    foreach (double latlng in latlngs)
+            //    {
+            //        string sql = $"insert into latlngs values('{alpha3code}', '{latlng}')";
+
+            //        command = new SQLiteCommand(sql, connection);
+
+            //        command.ExecuteNonQuery();
+            //    }
+            //});
         }
 
-        public void GetLatlngs(List<Country> countries)
+        public void GetLatlngs(Country country)
         {
             try
             {
-                string sql = "select alpha3code, latlng from latlngs";
+                string sql = $"select alpha3code, latlng from latlngs where alpha3code = '{country.Alpha3Code}'";
 
                 command = new SQLiteCommand(sql, connection);
 
                 SQLiteDataReader reader = command.ExecuteReader();
 
+                country.Latlng = new List<double>();
+
                 while (reader.Read())
                 {
-                    foreach (var country in countries)
-                    {
-                        while (reader["alpha3code"].ToString() == country.Alpha3Code)
-                        {
-                            country.Latlng.Add(Convert.ToDouble(reader["latlng"]));
-                        }
-                    }
+                    country.Latlng.Add(Convert.ToDouble(reader["latlng"]));
                 }
 
-                connection.Close();
+                //connection.Close();
             }
             catch (Exception e)
             {
