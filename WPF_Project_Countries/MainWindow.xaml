@@ -5,27 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPF_Project_Countries"
         mc:Ignorable="d"
-        Title="Countries" Height="497" Width="521">
-    <Grid>
-        <ComboBox x:Name="ComboBox_countries" HorizontalAlignment="Left" VerticalAlignment="Top" Width="237" Margin="10,58,0,0" SelectionChanged="ComboBox_countries_SelectionChanged"/>
+        Title="Countries" Height="496.333" Width="293" ResizeMode="CanMinimize" Closing="Window_Closing">
+    <Grid Background="DarkGray">
+        <ComboBox x:Name="ComboBox_countries" HorizontalAlignment="Left" VerticalAlignment="Top" Width="257" Margin="10,10,0,0" SelectionChanged="ComboBox_countries_SelectionChanged" IsEnabled="False"/>
         <Label x:Name="Label_status" Content="Label" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,352,0,0" Visibility="Hidden"/>
-        <Button x:Name="Button_close" Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="428,436,0,0" Click="Button_close_Click"/>
-        <TextBox x:Name="TextBox_region" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="10,160,0,0" IsEnabled="False"/>
-        <TextBox x:Name="TextBox_subregion" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="248,160,0,0" IsEnabled="False"/>
-        <TextBox x:Name="TextBox_gini" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="10,315,0,0" IsEnabled="False"/>
-        <TextBox x:Name="TextBox_capital" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="10,241,0,0" IsEnabled="False"/>
-        <TextBox x:Name="TextBox_population" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="248,241,0,0" IsEnabled="False"/>
-        <Label Content="Gini Index" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,284,0,0" Width="120"/>
-        <Label Content="Population" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="248,210,0,0" Width="120"/>
-        <Label Content="Capital" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,210,0,0" Width="120"/>
-        <Label Content="Sub-Region" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="248,129,0,0" Width="120"/>
-        <Label Content="Region&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,129,0,0" Width="120"/>
-        <Image x:Name="Image_flag" HorizontalAlignment="Left" Height="95" VerticalAlignment="Top" Width="185" Margin="304,29,0,0"/>
-        <Button x:Name="Button_details" Content="Show country details" HorizontalAlignment="Left" VerticalAlignment="Top" Width="179" Margin="248,315,0,0" Height="23" Click="Button_details_Click" IsEnabled="False"/>
-        <ProgressBar x:Name="ProgressBar_api" HorizontalAlignment="Left" Height="20" Margin="10,399,0,0" VerticalAlignment="Top" Width="157" Visibility="Hidden"/>
-        <ProgressBar x:Name="ProgressBar_database" HorizontalAlignment="Left" Height="20" Margin="10,430,0,0" VerticalAlignment="Top" Width="157" Visibility="Hidden"/>
-        <Label x:Name="LabelApiProgress" Content="" HorizontalAlignment="Left" Margin="172,396,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="LabelDatabaseProgress" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="172,427,0,0"/>
+        <Button x:Name="Button_close" Content="Close program" HorizontalAlignment="Left" VerticalAlignment="Top" Width="257" Margin="10,423,0,0" Click="Button_close_Click" Height="23"/>
+        <TextBox x:Name="TextBox_region" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="88,154,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_subregion" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="88,185,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_gini" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="88,278,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_capital" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="88,216,0,0" IsEnabled="False"/>
+        <TextBox x:Name="TextBox_population" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="179" Margin="88,247,0,0" IsEnabled="False"/>
+        <Label Content="Gini Index" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,275,0,0" Width="66"/>
+        <Label Content="Population" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14,244,0,0" Width="69"/>
+        <Label Content="Capital" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,213,0,0" Width="48"/>
+        <Label Content="Sub-Region" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,182,0,0" Width="73"/>
+        <Label Content="Region" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,151,0,0" Width="48"/>
+        <Image x:Name="Image_flag" HorizontalAlignment="Left" Height="95" VerticalAlignment="Top" Width="185" Margin="49,51,0,0"/>
+        <Button x:Name="Button_details" Content="Show country details" HorizontalAlignment="Left" VerticalAlignment="Top" Width="257" Margin="10,329,0,0" Height="23" Click="Button_details_Click" IsEnabled="False"/>
+        <ProgressBar x:Name="ProgressBar_api" HorizontalAlignment="Left" Height="28" Margin="10,357,0,0" VerticalAlignment="Top" Width="257" Visibility="Hidden" Foreground="DarkCyan" Background="DarkGray"/>
+        <ProgressBar x:Name="ProgressBar_database" HorizontalAlignment="Left" Height="28" Margin="10,390,0,0" VerticalAlignment="Top" Width="257" Visibility="Hidden" Foreground="DarkCyan" Background="DarkGray"/>
+        <Label x:Name="LabelApiProgress" Content="" HorizontalAlignment="Left" Margin="10,358,0,0" VerticalAlignment="Top" Height="27" Foreground="White"/>
+        <Label x:Name="LabelDatabaseProgress" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,390,0,0" Height="28" Foreground="White"/>
 
     </Grid>
 </Window>

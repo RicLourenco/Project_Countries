@@ -1,30 +1,34 @@
 ﻿namespace WPF_Project_Countries.Services
 {
-    using Library.Models;
+    #region Usings
+
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
+
+    #endregion
 
     class OtherAcronymsService
     {
-        private SQLiteConnection connection;
+        #region Variables
 
         private SQLiteCommand command;
 
-        private DialogService dialogService;
+        private readonly DialogService dialogService = new DialogService();
 
-        public OtherAcronymsService()
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Parametrized constructor for the other acronyms services, that receives an SQLiteConnection and creates an SQLite table for the OtherAcronyms string list
+        /// </summary>
+        /// <param name="connection"></param>
+        public OtherAcronymsService(SQLiteConnection connection)
         {
-            var path = @"Data\Countries.sqlite";
-
             try
             {
-                connection = new SQLiteConnection("Data Source=" + path);
-                connection.Open();
-
                 string sqlcommand = "create table if not exists otherAcronyms(id_regionalBloc int, otherAcronym varchar(50), foreign key (id_regionalBloc) references regionalBloc(id));";
 
                 command = new SQLiteCommand(sqlcommand, connection);
@@ -33,13 +37,57 @@
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
 
-        public async Task SaveOtherAcronymsAsync(List<string> otherAcronyms)
+        #endregion
+
+        #region Methods (alphabetical order)
+
+        /// <summary>
+        /// Gets the otherAcronyms strings from the sqlite table otherAcronyms and adds them to a regionaBloc's otherAcronyms list
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task<List<string>> GetOtherAcronyms(string id, SQLiteConnection connection)
         {
-            await Task.Run(() =>
+            try
+            {
+                List<string> otherAcronyms = new List<string>();
+
+                await Task.Run(() =>
+                {
+                    string sql = $"select otherAcronym from otherAcronyms where id_regionalBloc = '{id}'";
+
+                    command = new SQLiteCommand(sql, connection);
+
+                    SQLiteDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        otherAcronyms.Add(reader["otherAcronym"].ToString());
+                    }
+                });
+                return otherAcronyms;
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Error", e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Receives a regional bloc's list of otherAcronyms string, and inserts it into the otherAcronyms sqlite table using an SQLiteConnection
+        /// </summary>
+        /// <param name="otherAcronyms"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task SaveOtherAcronymsAsync(List<string> otherAcronyms, SQLiteConnection connection)
+        {
+            try
             {
                 foreach (string otherAcronym in otherAcronyms)
                 {
@@ -49,48 +97,15 @@
 
                     command.Connection = connection;
 
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
-            });
-
-            //await Task.Run(() => {
-            //    foreach (string otherAcronym in otherAcronyms)
-            //    {
-            //        string sql = $"insert into otherAcronyms values((select id from regionalBlocs order by id desc limit 1), '{otherAcronym}')";
-
-            //        command = new SQLiteCommand(sql, connection);
-
-            //        command.ExecuteNonQuery();
-            //    }
-            //});
-        }
-
-        public List<string> GetOtherAcronyms(string id)
-        {
-            try
-            {
-                string sql = $"select otherAcronym from otherAcronyms where id_regionalBloc = '{id}'";
-
-                command = new SQLiteCommand(sql, connection);
-
-                SQLiteDataReader reader = command.ExecuteReader();
-
-                List<string> otherAcronyms = new List<string>();
-
-                while (reader.Read())
-                {
-                    otherAcronyms.Add(reader["otherAcronym"].ToString());
-                }
-
-                return otherAcronyms;
-
-                //connection.Close();
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
-                return null;
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
+
+        #endregion
     }
 }

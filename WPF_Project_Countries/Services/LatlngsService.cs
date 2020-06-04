@@ -1,30 +1,35 @@
 ﻿namespace WPF_Project_Countries.Services
 {
-    using Library.Models;
+    #region Usings
+
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
+    using Library.Models;
+
+    #endregion
 
     class LatlngsService
     {
-        private SQLiteConnection connection;
+        #region Variables
 
         private SQLiteCommand command;
 
-        private DialogService dialogService = new DialogService();
+        private readonly DialogService dialogService = new DialogService();
 
-        public LatlngsService()
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Parametrized constructor for the latitude and logitudes services, that receives an SQLiteConnection and creates an SQLite table for the Latlng double list
+        /// </summary>
+        /// <param name="connection"></param>
+        public LatlngsService( SQLiteConnection connection)
         {
-            var path = @"Data\Countries.sqlite";
-
             try
             {
-                connection = new SQLiteConnection("Data Source=" + path);
-                connection.Open();
-
                 string sqlcommand = "create table if not exists latlngs(alpha3code char(3), latlng real, foreign key (alpha3code) references countries(alpha3code));";
 
                 command = new SQLiteCommand(sqlcommand, connection);
@@ -33,13 +38,55 @@
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
 
-        public async Task SaveLatlngsAsync(List<double> latlngs, string alpha3code)
+        #endregion
+
+        #region Methods (alphabetical order)
+
+        /// <summary>
+        /// Gets the latlngs doubles from the sqlite table latlngs and adds them to a country's latlngs list
+        /// </summary>
+        /// <param name="country"></param>
+        /// <param name="connection"></param>
+        public async Task GetLatlngs(Country country, SQLiteConnection connection)
         {
-            await Task.Run(() =>
+            try
+            {
+                await Task.Run(() =>
+                {
+                    string sql = $"select alpha3code, latlng from latlngs where alpha3code = '{country.Alpha3Code}'";
+
+                    command = new SQLiteCommand(sql, connection);
+
+                    SQLiteDataReader reader = command.ExecuteReader();
+
+                    country.Latlng = new List<double>();
+
+                    while (reader.Read())
+                    {
+                        country.Latlng.Add(Convert.ToDouble(reader["latlng"]));
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Error", e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Receives a country's alpha3code and its respective list of Latlngs double, and inserts it into the latlngs sqlite table using an SQLiteConnection
+        /// </summary>
+        /// <param name="latlngs"></param>
+        /// <param name="alpha3code"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task SaveLatlngsAsync(List<double> latlngs, string alpha3code, SQLiteConnection connection)
+        {
+            try
             {
                 foreach (double latlng in latlngs)
                 {
@@ -50,45 +97,15 @@
 
                     command.Connection = connection;
 
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
-            });
-
-            //await Task.Run(() => {
-            //    foreach (double latlng in latlngs)
-            //    {
-            //        string sql = $"insert into latlngs values('{alpha3code}', '{latlng}')";
-
-            //        command = new SQLiteCommand(sql, connection);
-
-            //        command.ExecuteNonQuery();
-            //    }
-            //});
-        }
-
-        public void GetLatlngs(Country country)
-        {
-            try
-            {
-                string sql = $"select alpha3code, latlng from latlngs where alpha3code = '{country.Alpha3Code}'";
-
-                command = new SQLiteCommand(sql, connection);
-
-                SQLiteDataReader reader = command.ExecuteReader();
-
-                country.Latlng = new List<double>();
-
-                while (reader.Read())
-                {
-                    country.Latlng.Add(Convert.ToDouble(reader["latlng"]));
-                }
-
-                //connection.Close();
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
+
+        #endregion
     }
 }

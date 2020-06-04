@@ -1,29 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WPF_Project_Countries.Services
+﻿namespace WPF_Project_Countries.Services
 {
+    #region Usings
+
+    using System;
+    using System.Collections.Generic;
+    using System.Data.SQLite;
+    using System.Threading.Tasks;
+
+    #endregion
+
     class OtherNamesService
     {
-        private SQLiteConnection connection;
+        #region Variables
 
         private SQLiteCommand command;
 
-        private DialogService dialogService;
+        private readonly DialogService dialogService = new DialogService();
 
-        public OtherNamesService()
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Parametrized constructor for the other names services, that receives an SQLiteConnection and creates an SQLite table for the OtherNames string list
+        /// </summary>
+        /// <param name="connection"></param>
+        public OtherNamesService(SQLiteConnection connection)
         {
-            var path = @"Data\Countries.sqlite";
-
             try
             {
-                connection = new SQLiteConnection("Data Source=" + path);
-                connection.Open();
-
                 string sqlcommand = "create table if not exists otherNames(id_regionalBloc integer, otherName varchar(50), foreign key (id_regionalBloc) references regionalBloc(id))";
 
                 command = new SQLiteCommand(sqlcommand, connection);
@@ -32,13 +37,58 @@ namespace WPF_Project_Countries.Services
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
 
-        public async Task SaveOtherNamesAsync(List<string> otherNames)
+        #endregion
+
+        #region Methods (alphabetical order)
+
+        /// <summary>
+        /// Gets the otherNames strings from the sqlite table otherNames and adds them to a regionaBloc's otherNames list
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task<List<string>> GetOtherNames(string id, SQLiteConnection connection)
         {
-            await Task.Run(() =>
+            try
+            {
+                List<string> otherNames = new List<string>();
+
+                await Task.Run(() =>
+                {
+                    string sql = $"select otherName from otherNames where id_regionalBloc = '{id}'";
+
+                    command = new SQLiteCommand(sql, connection);
+
+                    SQLiteDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        otherNames.Add(reader["otherName"].ToString());
+                    }
+                });
+
+                return otherNames;
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Error", e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Receives a regional bloc's list of otherNames string, and inserts it into the otherNames sqlite table using an SQLiteConnection
+        /// </summary>
+        /// <param name="otherNames"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task SaveOtherNamesAsync(List<string> otherNames, SQLiteConnection connection)
+        {
+            try
             {
                 foreach (string otherName in otherNames)
                 {
@@ -48,48 +98,15 @@ namespace WPF_Project_Countries.Services
 
                     command.Connection = connection;
 
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
-            });
-
-            //await Task.Run(() => {
-            //    foreach (string otherName in otherNames)
-            //    {
-            //        string sql = $"insert into otherNames values((select id from regionalBlocs order by id desc limit 1), \"{otherName}\")";
-
-            //        command = new SQLiteCommand(sql, connection);
-
-            //        command.ExecuteNonQuery();
-            //    }
-            //});
-        }
-
-        public List<string> GetOtherNames(string id)
-        {
-            try
-            {
-                string sql = $"select otherName from otherNames where id_regionalBloc = '{id}'";
-
-                command = new SQLiteCommand(sql, connection);
-
-                SQLiteDataReader reader = command.ExecuteReader();
-
-                List<string> otherNames = new List<string>();
-
-                while (reader.Read())
-                {
-                    otherNames.Add(reader["otherName"].ToString());
-                }
-
-                return otherNames;
-
-                //connection.Close();
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
-                return null;
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
+
+        #endregion
     }
 }

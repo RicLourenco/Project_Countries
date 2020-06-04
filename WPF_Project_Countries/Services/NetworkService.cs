@@ -1,10 +1,16 @@
 ﻿namespace WPF_Project_Countries.Services
 {
+    #region Usings
+
     using System.Net;
     using Library.Models;
 
+    #endregion
+
     public class NetworkService
     {
+        #region Methods (alphabetical order)
+
         /// <summary>
         /// Checks if the computer has internet connection
         /// </summary>
@@ -33,5 +39,7 @@
                 };
             }
         }
+
+        #endregion
     }
 }

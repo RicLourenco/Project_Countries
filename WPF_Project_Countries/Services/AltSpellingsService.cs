@@ -1,29 +1,35 @@
 ﻿namespace WPF_Project_Countries.Services
 {
-    using Library.Models;
+    #region Usings
+
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
+    using Library.Models;
+
+    #endregion
 
     class AltSpellingsService
     {
-        private SQLiteConnection connection;
+        #region Variables
 
         private SQLiteCommand command;
 
-        private DialogService dialogService = new DialogService();
+        private readonly DialogService dialogService = new DialogService();
 
-        public AltSpellingsService()
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Parametrized constructor for the alterate spellings services, that receives an SQLiteConnection and creates an SQLite table for the AltSpelling string list
+        /// </summary>
+        /// <param name="connection"></param>
+        public AltSpellingsService(SQLiteConnection connection)
         {
-            var path = @"Data\Countries.sqlite";
-
             try
             {
-                connection = new SQLiteConnection("Data Source=" + path);
-                connection.Open();
 
                 string sqlcommand = "create table if not exists altSpellings(alpha3code char(3), altSpelling varchar(50), foreign key (alpha3code) references countries(alpha3code));";
 
@@ -33,13 +39,56 @@
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
 
-        public async Task SaveAltSpellings(List<string> altSpellings, string alpha3code)
+        #endregion
+
+        #region Methods (alphabetical order)
+
+        /// <summary>
+        /// Gets the altSpelling strings from the sqlite table altSpellings and adds them to a country's altSpellings list
+        /// </summary>
+        /// <param name="country"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task GetAltSpellings(Country country, SQLiteConnection connection)
         {
-            await Task.Run(() =>
+            try
+            {
+                await Task.Run(() =>
+                {
+                    string sql = $"select alpha3code, altSpelling from altSpellings where alpha3code = '{country.Alpha3Code}'";
+
+                    command = new SQLiteCommand(sql, connection);
+
+                    SQLiteDataReader reader = command.ExecuteReader();
+
+                    country.AltSpellings = new List<string>();
+
+                    while (reader.Read())
+                    {
+                        country.AltSpellings.Add(reader["altSpelling"].ToString());
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Error", e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Receives a country's alpha3code and its respective list of altSpellings string, and inserts it into the altSpellings sqlite table using an SQLiteConnection
+        /// </summary>
+        /// <param name="altSpellings"></param>
+        /// <param name="alpha3code"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task SaveAltSpellingsAsync(List<string> altSpellings, string alpha3code, SQLiteConnection connection)
+        {
+            try
             {
                 foreach (string altSpelling in altSpellings)
                 {
@@ -50,48 +99,15 @@
 
                     command.Connection = connection;
 
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
-            });
-
-            //await Task.Run(() => {
-            //    foreach (string altSpelling in altSpellings)
-            //    {
-            //        string sql = $"insert into altSpellings values('{alpha3code}', \"{altSpelling}\")";
-
-            //        command = new SQLiteCommand(sql, connection);
-
-            //        command.ExecuteNonQuery();
-            //    }
-            //});
-
-            //connection.Close();
-
-        }
-
-        public void GetAltSpellings(Country country)
-        {
-            try
-            {
-                string sql = $"select alpha3code, altSpelling from altSpellings where alpha3code = '{country.Alpha3Code}'";
-
-                command = new SQLiteCommand(sql, connection);
-
-                SQLiteDataReader reader = command.ExecuteReader();
-
-                country.AltSpellings = new List<string>();
-
-                while (reader.Read())
-                {
-                    country.AltSpellings.Add(reader["altSpelling"].ToString());
-                }
-
-                //connection.Close();
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
+
+        #endregion
     }
 }

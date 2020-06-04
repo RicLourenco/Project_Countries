@@ -1,5 +1,7 @@
 ﻿namespace WPF_Project_Countries.Services
 {
+    #region Usings
+
     using System;
     using System.Collections.Generic;
     using System.Net.Http;
@@ -7,15 +9,22 @@
     using System.Net;
     using System.IO;
     using System.Drawing.Imaging;
+    using Library.Models;
     using Svg;
     using Newtonsoft.Json;
-    using Library.Models;
 
-    //TODO: Proper error handling in the catch blocks when downloading and converting flags
-    //TODO: If the default.svg link no longer exists, the program will crash
+    #endregion
 
     public class ApiService
     {
+        #region Variables
+
+        private readonly DialogService dialogService = new DialogService();
+
+        #endregion
+
+        #region Methods
+
         /// <summary>
         /// Fetches data from the API through a JSON deserializer
         /// </summary>
@@ -24,11 +33,9 @@
         /// <returns>Response object</returns>
         public async Task<Response> GetCountries(string urlBase, string controller, IProgress<ProgressReport> progress)
         {
-            
-
             try
             {
-                var client = new HttpClient
+                HttpClient client = new HttpClient
                 {
                     BaseAddress = new Uri(urlBase)
                 };
@@ -51,11 +58,6 @@
                     NullValueHandling = NullValueHandling.Ignore
                 });
 
-                if (!Directory.Exists("Flags"))
-                {
-                    Directory.CreateDirectory("Flags");
-                }
-
                 DownloadFlags(countries);
 
                 await ConvertFlags(countries, progress);
@@ -77,13 +79,13 @@
         }
 
         /// <summary>
-        /// Converts flags from svg format to bmp
+        /// Converts flags from svg format to bitmap
         /// </summary>
         /// <param name="countries"></param>
         private async Task ConvertFlags(List<Country> countries, IProgress<ProgressReport> progress)
         {
             ProgressReport report = new ProgressReport();
-            byte i = 1;
+            int i = 1;
 
             await Task.Run(() => {
                 foreach (var country in countries)
@@ -103,9 +105,9 @@
                             }
                         }
                     }
-                    catch
+                    catch(Exception e)
                     {
-
+                        dialogService.ShowMessage("Error", $"An error occurred trying to convert {country.Name}'s flag\n{e.Message}");
                     }
 
                     report.CompletePercentage = Convert.ToByte((i * 100) / countries.Count);
@@ -129,19 +131,24 @@
                         }
                     }
                 }
-                catch
+                catch(Exception e)
                 {
-
+                    dialogService.ShowMessage("Error", $"An error occurred trying to convert the default flag\n{e.Message}");
                 }
             });
         }
 
         /// <summary>
-        /// Download flags from the API in svg format
+        /// Downloads flags from the API in svg format
         /// </summary>
         /// <param name="countries"></param>
         private void DownloadFlags(List<Country> countries)
         {
+            if (!Directory.Exists("Flags"))
+            {
+                Directory.CreateDirectory("Flags");
+            }
+
             foreach (var country in countries)
             {
                 try
@@ -151,9 +158,9 @@
                         flag.DownloadFileAsync(country.Flag, $@"Flags\{country.Name}.svg");
                     }
                 }
-                catch
+                catch(Exception e)
                 {
-
+                    dialogService.ShowMessage("Error", e.Message);
                 }
             }
 
@@ -165,10 +172,12 @@
 
                 noFlag.Dispose();
             }
-            catch
+            catch(Exception e)
             {
-
+                dialogService.ShowMessage("Error", $"Couldn't fetch the default flag\nmost likely the link no longer exists\n{e.Message}");
             }
         }
+
+        #endregion
     }
 }

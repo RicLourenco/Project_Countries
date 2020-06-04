@@ -1,30 +1,35 @@
 ﻿namespace WPF_Project_Countries.Services
 {
-    using Library.Models;
+    #region Usings
+
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
+    using Library.Models;
+
+    #endregion
 
     class LanguageDataService
     {
-        private SQLiteConnection connection;
+        #region Variables
 
         private SQLiteCommand command;
 
-        private DialogService dialogService = new DialogService();
+        private readonly DialogService dialogService = new DialogService();
 
-        public LanguageDataService()
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Parametrized constructor for the languages services, that receives an SQLiteConnection and creates an SQLite table for the Language object
+        /// </summary>
+        /// <param name="connection"></param>
+        public LanguageDataService(SQLiteConnection connection)
         {
-            var path = @"Data\Countries.sqlite";
-
             try
             {
-                connection = new SQLiteConnection("Data Source=" + path);
-                connection.Open();
-
                 string sqlcommand = "create table if not exists languages(alpha3code char(3), iso639_1 char(2), iso639_2 char(3), name varchar(50), nativeName varchar(50), foreign key(alpha3code) references country(alpha3code))";
 
                 command = new SQLiteCommand(sqlcommand, connection);
@@ -33,13 +38,61 @@
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
 
-        public async Task SaveLanguageAsync(List<Language> languages, string alpha3code)
+        #endregion
+
+        #region Methods (alphabetical order)
+
+        /// <summary>
+        /// Gets the languages objects from the sqlite table languages and adds them to a country's languages list
+        /// </summary>
+        /// <param name="country"></param>
+        /// <param name="connection"></param>
+        public async Task GetLanguages(Country country, SQLiteConnection connection)
         {
-            await Task.Run(() =>
+            try
+            {
+                await Task.Run(() =>
+                {
+                    string sql = $"select alpha3code, iso639_1, iso639_2, name, nativeName from languages where alpha3code = '{country.Alpha3Code}'";
+
+                    command = new SQLiteCommand(sql, connection);
+
+                    SQLiteDataReader reader = command.ExecuteReader();
+
+                    country.Languages = new List<Language>();
+
+                    while (reader.Read())
+                    {
+                        country.Languages.Add(new Language
+                        {
+                            Iso639_1 = reader["iso639_1"].ToString(),
+                            Iso639_2 = reader["iso639_2"].ToString(),
+                            Name = reader["name"].ToString(),
+                            NativeName = reader["nativeName"].ToString()
+                        });
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Error", e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Receives a country's alpha3code and its respective list of languages object, and inserts it into the languages sqlite table using an SQLiteConnection
+        /// </summary>
+        /// <param name="languages"></param>
+        /// <param name="alpha3code"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task SaveLanguageAsync(List<Language> languages, string alpha3code, SQLiteConnection connection)
+        {
+            try
             {
                 foreach (Language language in languages)
                 {
@@ -49,55 +102,19 @@
                     command.Parameters.AddWithValue("@name", language.Name);
                     command.Parameters.AddWithValue("@nativeName", language.NativeName);
 
-                    command.CommandText = "insert into languages values(@alpha3code, @iso639_1, @iso639_2, @name, @nativeName )";
+                    command.CommandText = "insert into languages values(@alpha3code, @iso639_1, @iso639_2, @name, @nativeName)";
 
                     command.Connection = connection;
 
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
-            });
-
-            //await Task.Run(() => {
-            //    foreach (Language language in languages)
-            //    {
-            //        string sql =  $"insert into languages values('{alpha3code}', '{language.Iso639_1}', '{language.Iso639_2}', \"{language.Name}\", \"{language.NativeName}\")";
-
-            //        command = new SQLiteCommand(sql, connection);
-
-            //        command.ExecuteNonQuery();
-            //    }
-            //});
-        }
-
-        public void GetLanguages(Country country)
-        {
-            try
-            {
-                string sql = $"select alpha3code, iso639_1, iso639_2, name, nativeName from languages where alpha3code = '{country.Alpha3Code}'";
-
-                command = new SQLiteCommand(sql, connection);
-
-                SQLiteDataReader reader = command.ExecuteReader();
-
-                country.Languages = new List<Language>();
-
-                while (reader.Read())
-                {
-                    country.Languages.Add(new Language
-                    {
-                        Iso639_1 = reader["iso639_1"].ToString(),
-                        Iso639_2 = reader["iso639_2"].ToString(),
-                        Name = reader["name"].ToString(),
-                        NativeName = reader["nativeName"].ToString()
-                    });
-                }
-
-                //connection.Close();
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
+
+        #endregion
     }
 }

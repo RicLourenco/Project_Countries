@@ -1,30 +1,35 @@
 ﻿namespace WPF_Project_Countries.Services
 {
-    using Library.Models;
+    #region Usings
+
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
+    using Library.Models;
+
+    #endregion
 
     class BordersService
     {
-        private SQLiteConnection connection;
+        #region Variables
 
         private SQLiteCommand command;
 
-        private DialogService dialogService = new DialogService();
+        private readonly DialogService dialogService = new DialogService();
 
-        public BordersService()
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Parametrized constructor for the borders services, that receives an SQLiteConnection and creates an SQLite table for the Border string list
+        /// </summary>
+        /// <param name="connection"></param>
+        public BordersService(SQLiteConnection connection)
         {
-            var path = @"Data\Countries.sqlite";
-
             try
             {
-                connection = new SQLiteConnection("Data Source=" + path);
-                connection.Open();
-
                 string sqlcommand = "create table if not exists borders(alpha3code char(3), border char(3), foreign key (alpha3code) references countries(alpha3code))";
 
                 command = new SQLiteCommand(sqlcommand, connection);
@@ -33,13 +38,24 @@
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
 
-        public async Task SaveBordersAsync(List<string> borders, string alpha3code)
+        #endregion
+
+        #region Methods (alphabetical order)
+
+        /// <summary>
+        /// Receives a country's alpha3code and its respective list of borders string, and inserts it into the borders sqlite table using an SQLiteConnection
+        /// </summary>
+        /// <param name="borders"></param>
+        /// <param name="alpha3code"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task SaveBordersAsync(List<string> borders, string alpha3code, SQLiteConnection connection)
         {
-            await Task.Run(() =>
+            try
             {
                 foreach (string border in borders)
                 {
@@ -50,47 +66,47 @@
 
                     command.Connection = connection;
 
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
-            });
-
-            //await Task.Run(() => {
-            //    foreach (string border in borders)
-            //    {
-            //        string sql = $"insert into borders values('{alpha3code}', '{border}')";
-
-            //        command = new SQLiteCommand(sql, connection);
-
-            //        command.ExecuteNonQuery();
-            //    }
-            //});
-
-            //connection.Close();
-        }
-
-        public void GetAltBorders(Country country)
-        {
-            try
-            {
-                string sql = $"select alpha3code, border from borders where alpha3code = '{country.Alpha3Code}'";
-
-                command = new SQLiteCommand(sql, connection);
-
-                SQLiteDataReader reader = command.ExecuteReader();
-
-                country.Borders = new List<string>();
-
-                while (reader.Read())
-                {
-                    country.Borders.Add(reader["border"].ToString());
-                }
-
-                //connection.Close();
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
+
+        /// <summary>
+        /// Gets the borders strings from the sqlite table borders and adds them to a country's borders list
+        /// </summary>
+        /// <param name="country"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task GetAltBorders(Country country, SQLiteConnection connection)
+        {
+            try
+            {
+                await Task.Run(() =>
+                {
+                    string sql = $"select alpha3code, border from borders where alpha3code = '{country.Alpha3Code}'";
+
+                    command = new SQLiteCommand(sql, connection);
+
+                    SQLiteDataReader reader = command.ExecuteReader();
+
+                    country.Borders = new List<string>();
+
+                    while (reader.Read())
+                    {
+                        country.Borders.Add(reader["border"].ToString());
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Error", e.Message);
+            }
+        }
+
+        #endregion
     }
 }

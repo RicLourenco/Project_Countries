@@ -1,54 +1,115 @@
 ﻿namespace WPF_Project_Countries.Services
 {
-    using Library.Models;
+    #region Usings
+
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
-    using System.Drawing;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
+    using Library.Models;
+
+    #endregion
 
     class RegionalBlocDataService
     {
-        private SQLiteConnection connection;
+        #region Variables
+
         private SQLiteCommand command;
-        private DialogService dialogService;
+
+        private readonly DialogService dialogService = new DialogService();
+
         private OtherAcronymsService otherAcronyms;
+
         private OtherNamesService otherNames;
 
-        public RegionalBlocDataService()
-        {
-            var path = @"Data\Countries.sqlite";
+        #endregion
 
+        #region Constructor
+
+        /// <summary>
+        /// Parametrized constructor for the regional blocs services, that receives an SQLiteConnection and creates an SQLite table for the RegionalBloc object
+        /// </summary>
+        /// <param name="connection"></param>
+        public RegionalBlocDataService(SQLiteConnection connection)
+        {
             try
             {
-                connection = new SQLiteConnection("Data Source=" + path);
-                connection.Open();
-
                 string sqlcommand = "create table if not exists regionalBlocs(id integer primary key, alpha3code char(3), acronym varchar(20), name varchar(50), foreign key(alpha3code) references country(alpha3code))";
 
                 command = new SQLiteCommand(sqlcommand, connection);
 
                 command.ExecuteNonQuery();
 
-                CreateOtherTables();
+                CreateOtherTables(connection);
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
 
-        private void CreateOtherTables()
+        #endregion
+
+        #region Methods (alphabetical order)
+
+        /// <summary>
+        /// Calls the otherAcronyms and otherNnames services constructors to create a new sqlite table for each
+        /// </summary>
+        /// <param name="connection"></param>
+        private void CreateOtherTables(SQLiteConnection connection)
         {
-            otherAcronyms = new OtherAcronymsService();
-            otherNames = new OtherNamesService();
+            otherAcronyms = new OtherAcronymsService(connection);
+            otherNames = new OtherNamesService(connection);
         }
 
-        public async Task SaveRegionalBlocAsync(List<RegionalBloc> regionalBlocs, string alpha3code)
+        /// <summary>
+        /// Gets the regionalBlocs objects from the sqlite table regionalBlocs and adds them to a country's regionalBlocs list
+        /// </summary>
+        /// <param name="country"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task GetRegionalBlocs(Country country, SQLiteConnection connection)
         {
-            await Task.Run(async () =>
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    string sql = $"select id, acronym, name from regionalBlocs where alpha3code = '{country.Alpha3Code}'";
+
+                    command = new SQLiteCommand(sql, connection);
+
+                    SQLiteDataReader reader = command.ExecuteReader();
+
+                    country.RegionalBlocs = new List<RegionalBloc>();
+
+                    while (reader.Read())
+                    {
+                        country.RegionalBlocs.Add(new RegionalBloc
+                        {
+                            Acronym = reader["acronym"].ToString(),
+                            Name = reader["name"].ToString(),
+                            OtherAcronyms = new List<string>(await otherAcronyms.GetOtherAcronyms(reader["id"].ToString(), connection)),
+                            OtherNames = new List<string>(await otherNames.GetOtherNames(reader["id"].ToString(), connection))
+                        });
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Error", e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Receives a country's alpha3code and its respective list of regionalBlocs object, and inserts it into the regionalBlocs sqlite table using an SQLiteConnection
+        /// </summary>
+        /// <param name="regionalBlocs"></param>
+        /// <param name="alpha3code"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task SaveRegionalBlocAsync(List<RegionalBloc> regionalBlocs, string alpha3code, SQLiteConnection connection)
+        {
+            try
             {
                 foreach (RegionalBloc regionalBloc in regionalBlocs)
                 {
@@ -60,57 +121,18 @@
 
                     command.Connection = connection;
 
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
 
-                    await otherAcronyms.SaveOtherAcronymsAsync(regionalBloc.OtherAcronyms);
-                    await otherNames.SaveOtherNamesAsync(regionalBloc.OtherNames);
+                    await otherAcronyms.SaveOtherAcronymsAsync(regionalBloc.OtherAcronyms, connection);
+                    await otherNames.SaveOtherNamesAsync(regionalBloc.OtherNames, connection);
                 }
-            });
-
-            //await Task.Run( async() => {
-            //    foreach (RegionalBloc regionalBloc in regionalBlocs)
-            //    {
-            //        string sql = $"insert into regionalBlocs values(null, '{alpha3code}', '{regionalBloc.Acronym}', \"{regionalBloc.Name}\")";
-
-            //        command = new SQLiteCommand(sql, connection);
-
-            //        command.ExecuteNonQuery();
-
-            //        await otherAcronyms.SaveOtherAcronymsAsync(regionalBloc.OtherAcronyms);
-            //        await otherNames.SaveOtherNamesAsync(regionalBloc.OtherNames);
-            //    }
-            //});
-        }
-
-        public void GetRegionalBlocs(Country country)
-        {
-            try
-            {
-                string sql = $"select id, acronym, name from regionalBlocs where alpha3code = '{country.Alpha3Code}'";
-
-                command = new SQLiteCommand(sql, connection);
-
-                SQLiteDataReader reader = command.ExecuteReader();
-
-                country.RegionalBlocs = new List<RegionalBloc>();
-
-                while (reader.Read())
-                {
-                    country.RegionalBlocs.Add(new RegionalBloc
-                    {
-                        Acronym = reader["acronym"].ToString(),
-                        Name = reader["name"].ToString(),
-                        OtherAcronyms = new List<string>(otherAcronyms.GetOtherAcronyms(reader["id"].ToString())),
-                        OtherNames = new List<string>(otherNames.GetOtherNames(reader["id"].ToString()))
-                    });
-                }
-
-                //connection.Close();
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
+
+        #endregion
     }
 }

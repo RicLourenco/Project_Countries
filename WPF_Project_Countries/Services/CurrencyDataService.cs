@@ -1,30 +1,35 @@
 ﻿namespace WPF_Project_Countries.Services
 {
+    #region Usings
+
     using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using Library.Models;
 
+    #endregion
+
     class CurrencyDataService
     {
-        private SQLiteConnection connection;
+        #region Variables
 
         private SQLiteCommand command;
 
-        private DialogService dialogService = new DialogService();
+        private readonly DialogService dialogService = new DialogService();
 
-        public CurrencyDataService()
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Parametrized constructor for the currencies services, that receives an SQLiteConnection and creates an SQLite table for the Currency object
+        /// </summary>
+        /// <param name="connection"></param>
+        public CurrencyDataService(SQLiteConnection connection)
         {
-            var path = @"Data\Countries.sqlite";
-
             try
             {
-                connection = new SQLiteConnection("Data Source=" + path);
-                connection.Open();
-
                 string sqlcommand = "create table if not exists currencies(alpha3code char(3), code char(3), name varchar(50), symbol varchar(10), foreign key(alpha3code) references country(alpha3code))";
 
                 command = new SQLiteCommand(sqlcommand, connection);
@@ -33,13 +38,61 @@
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
 
-        public async Task SaveCurrencyAsync(List<Currency> currencies, string alpha3code)
+        #endregion
+
+        #region Methods (alphabetical order)
+
+        /// <summary>
+        /// Gets the currencies objects from the sqlite table currencies and adds them to a country's currencies list
+        /// </summary>
+        /// <param name="country"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task GetCurrencies(Country country, SQLiteConnection connection)
         {
-            await Task.Run(() =>
+            try
+            {
+                await Task.Run(() =>
+                {
+                    string sql = $"select alpha3code, code, name, symbol from currencies where alpha3code = '{country.Alpha3Code}'";
+
+                    command = new SQLiteCommand(sql, connection);
+
+                    SQLiteDataReader reader = command.ExecuteReader();
+
+                    country.Currencies = new List<Currency>();
+
+                    while (reader.Read())
+                    {
+                        country.Currencies.Add(new Currency
+                        {
+                            Code = reader["code"].ToString(),
+                            Name = reader["name"].ToString(),
+                            Symbol = reader["symbol"].ToString()
+                        });
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessage("Error", e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Receives a country's alpha3code and its respective list of currencies object, and inserts it into the currencies sqlite table using an SQLiteConnection
+        /// </summary>
+        /// <param name="currencies"></param>
+        /// <param name="alpha3code"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
+        public async Task SaveCurrencyAsync(List<Currency> currencies, string alpha3code, SQLiteConnection connection)
+        {
+            try
             {
                 foreach (Currency currency in currencies)
                 {
@@ -52,49 +105,15 @@
 
                     command.Connection = connection;
 
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                 }
-            });
-
-            //await Task.Run(() => {
-            //    foreach (Currency currency in currencies)
-            //    {
-            //        string sql = $"insert into currencies values('{alpha3code}', '{currency.Code}', \"{currency.Name}\", \"{currency.Symbol}\")";
-
-            //        command = new SQLiteCommand(sql, connection);
-
-            //        command.ExecuteNonQuery();
-            //    }
-            //});
-        }
-
-        public void GetCurrencies(Country country)
-        {
-            try
-            {
-                string sql = $"select alpha3code, code, name, symbol from currencies where alpha3code = '{country.Alpha3Code}'";
-
-                command = new SQLiteCommand(sql, connection);
-
-                SQLiteDataReader reader = command.ExecuteReader();
-
-                country.Currencies = new List<Currency>();
-
-                while (reader.Read())
-                {
-                    country.Currencies.Add(new Currency { 
-                    Code = reader["code"].ToString(),
-                    Name = reader["name"].ToString(),
-                    Symbol = reader["symbol"].ToString()
-                    });
-                }
-
-                //connection.Close();
             }
             catch (Exception e)
             {
-                dialogService.ShowMessage("Erro", e.Message);
+                dialogService.ShowMessage("Error", e.Message);
             }
         }
+
+        #endregion
     }
 }
